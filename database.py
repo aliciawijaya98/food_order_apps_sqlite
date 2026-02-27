@@ -1,19 +1,21 @@
-import mysql.connector
-from mysql.connector import Error
+import sqlite3
+import os
+
+db_name = "restaurant.db"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(base_dir, db_name)
 
 def get_connection():
     try:
-        conn = mysql.connector.connect(
-            host="127.0.0.1",  #IP lebih stabil
-            user="root",
-            password="admin",
-            port=3306
-        )
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        
         cursor = conn.cursor()
-        cursor.execute("CREATE DATABASE IF NOT EXISTS restaurant")
-        conn.database = "restaurant"
-        return conn
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        conn.commit()
 
-    except Error as e:
+        return conn
+    
+    except sqlite3.Error as e:
         print("[DB ERROR]", e)
         return None
