@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Edit Menu Item{% endblock %}
+
+{% block content %}
+<h1>Edit Menu Item</h1>
+
+{% if msg %}
+<p style="color:green">{{ msg }}</p>
+{% endif %}
+
+<form method="post">
+    Category: <input type="text" name="category" value="{{ item.category }}"><br><br>
+    Item Name: <input type="text" name="name" value="{{ item.item }}"><br><br>
+    Price: <input type="number" name="price" value="{{ item.price }}"><br><br>
+    <button type="submit">Save Changes</button>
+</form>
+
+<a href="{{ url_for('menu') }}">Back to Menu</a>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+<h2>Place Order</h2>
+<form method="POST">
+<div class="card">
+Order Type: 
+<select name="order_type">
+<option value="Dine-in">Dine-in</option>
+<option value="Takeaway">Takeaway</option>
+</select><br>
+Identifier (Table # or Invoice #): <input type="text" name="identifier"><br>
+<h3>Menu</h3>
+{% for idx, item in enumerate(menu) %}
+<div class="card">
+<p>{{ item.item }} (Rp{{ item.price }})</p>
+Quantity: <input type="number" name="qty_{{ idx }}" min="0" value="0">
+</div>
+{% endfor %}
+<input type="submit" value="Place Order">
+</div>
+</form>
+</div>
+{% endblock %}

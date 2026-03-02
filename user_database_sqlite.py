@@ -130,7 +130,6 @@ def get_user_by_userid(user_id):
 
 
 # UPDATE USER
-
 def update_user(user_id, updated_data):
     conn = get_connection()
     if not conn:
@@ -173,7 +172,6 @@ def update_user(user_id, updated_data):
 
 
 # DELETE USER
-
 def delete_user(user_id):
     conn = get_connection()
     if not conn:
@@ -190,7 +188,6 @@ def delete_user(user_id):
     return True, "Account deleted successfully."
 
 #VIEW USER ALL
-
 def get_all_users():
     conn = get_connection()
     if not conn:

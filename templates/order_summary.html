@@ -1,0 +1,17 @@
+<h1>Order Summary for {{ identifier }}</h1>
+<p>Cashier: {{ order.cashier }}</p>
+
+<table border="1">
+<tr>
+<th>No</th><th>Item</th><th>Qty</th><th>Price</th><th>Total</th>
+</tr>
+{% for i, item in enumerate(order.items) %}
+<tr>
+<td>{{ i+1 }}</td>
+<td>{{ item.item }}</td>
+<td>{{ item.quantity }}</td>
+<td>Rp{{ "{:,}".format(item.price).replace(",", ".") }}</td>
+<td>Rp{{ "{:,}".format(item.total).replace(",", ".") }}</td>
+</tr>
+{% endfor %}
+</table>
