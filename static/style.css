@@ -1,38 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* Base styles */
-body {
+/* Global font enforcement */
+*,
+*::before,
+*::after {
     font-family: "Roboto Condensed", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-
-    background-color: #fff7f0;
-    color: #333;
-    margin: 0;
-    padding: 10px;
-    line-height: 1.5;
 }
 
-/* Top navigation */
-nav {
+/* Base styles */
+body {
+    margin: 0;
+    font-family: "Roboto Condensed", sans-serif;
+}
+
+/* Nav full width */
+.navbar {
     background-color: #ff6f3c;
+}
+
+.nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 16px 32px;
 }
 
-nav a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    margin-right: 24px;
-    font-size: 16px;
+/* Page */
+.page {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 32px;
 }
 
-nav a:hover {
-    text-decoration: underline;
-}
-
-/* Page container */
+/* Page container controls whitespace */
 .container {
     max-width: 900px;
     margin: 24px auto;
@@ -86,7 +86,8 @@ input[type="submit"]:hover {
 input[type="text"],
 input[type="password"],
 input[type="number"],
-select {
+select,
+textarea {
     padding: 10px;
     margin: 6px 0 16px 0;
     width: 100%;
@@ -103,10 +104,6 @@ select {
     padding: 18px 20px;
     margin-bottom: 18px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-}
-
-.card p {
-    margin: 6px 0;
 }
 
 /* Tables */
