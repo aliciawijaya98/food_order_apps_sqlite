@@ -150,6 +150,7 @@ def logout():
     flash("Logged out")
     return redirect(url_for("login"))
 
+# VIEW PROFILE
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
     if "user_id" not in session:
