@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 db_name = "restaurant.db"
-base_dir = os.path.dirname(os.path.abspath(__file__))
+base_dir = os.path.dirname(os.path.dirname(__file__), "restaurant.db")
 db_path = os.path.join(base_dir, db_name)
 
 def get_connection():
