@@ -9,11 +9,6 @@ def get_connection():
     try:
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
-        
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL;")
-        conn.commit()
-
         return conn
     
     except sqlite3.Error as e:

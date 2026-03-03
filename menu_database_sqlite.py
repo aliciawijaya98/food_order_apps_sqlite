@@ -2,7 +2,7 @@ from database import get_connection
 import sqlite3
 
 # Initialize Menu_database_table
-def init_db():
+def init_food_menu_table():
     conn = get_connection()
     if not conn:
         return
