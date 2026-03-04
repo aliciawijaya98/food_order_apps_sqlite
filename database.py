@@ -1,21 +1,17 @@
-import sqlite3
-import os
+from sqlalchemy import create_engine
 
-db_name = "restaurant.db"
-base_dir = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(base_dir, db_name)
-
-def get_connection():
-    try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
+db_user = "root"
+db_pass = "admin"
+db_host = "127.0.0.1"
+db_port = 3306
+db_name = "restaurant"
         
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL;")
-        conn.commit()
-
-        return conn
-    
-    except sqlite3.Error as e:
-        print("[DB ERROR]", e)
-        return None
+Database_URL = (
+    f"mysql+pymysql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+)
+                
+# engine untuk database restaurant
+engine_db = create_engine(
+    Database_URL,
+    pool_pre_ping=True
+)
