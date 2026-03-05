@@ -13,22 +13,22 @@ def init_users_table():
 
         conn.execute(text("""
         CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(20) NOT NULL UNIQUE,
-            password VARCHAR(255) NOT NULL,
-            email VARCHAR(100) NOT NULL UNIQUE,
-            name VARCHAR(100) NOT NULL,
-            gender ENUM('male','female') NOT NULL,
-            age INT NOT NULL,
-            job VARCHAR(100),
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL UNIQUE,          
+            password TEXT NOT NULL,  
+            email TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
+            gender TEXT NOT NULL,
+            age INTEGER NOT NULL,
+            job TEXT,
             hobby TEXT,
-            city VARCHAR(100),
-            rt VARCHAR(5),
-            rw VARCHAR(5),
-            zip VARCHAR(5),
-            latitude VARCHAR(20),
-            longitude VARCHAR(20),
-            phone VARCHAR(15)
+            city TEXT,
+            rt TEXT,
+            rw TEXT,
+            zip TEXT,
+            latitude TEXT,
+            longitude TEXT,
+            phone TEXT
         )
         """))
 
@@ -80,7 +80,7 @@ def register_user(data):
         return True, "Registration successful."
 
     except Exception as e:
-        if "Duplicate" in str(e):
+        if "UNIQUE constraint" in str(e):
             return False, "UserID or Email already exists."
         return False, f"Database error: {e}"
 
@@ -167,7 +167,7 @@ def update_user(user_id, updated_data):
         return True, "Profile updated successfully."
 
     except Exception as e:
-        if "Duplicate" in str(e):
+        if "UNIQUE constraint" in str(e):
             return False, "Email already in use."
         return False, f"Database error: {e}"
 

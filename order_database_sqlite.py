@@ -8,30 +8,28 @@ def init_order_tables():
     #ORDERS TABLE (HEADER)
         conn.execute(text("""
         CREATE TABLE IF NOT EXISTS orders(
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            invoice_code VARCHAR (30) UNIQUE NOT NULL,
-            user_id VARCHAR(20) NOT NULL,
-            order_type ENUM ('Dine-in', 'Takeaway') NOT NULL,
-            reference_number INT NULL,
-            total_price DECIMAL(12,2) DEFAULT 0,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            invoice_code TEXT UNIQUE NOT NULL,
+            user_id TEXT NOT NULL,
+            order_type TEXT NOT NULL,
+            reference_number INTEGER,
+            total_price REAL DEFAULT 0,
             order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-            status ENUM ('pending', 'paid','cancelled') DEFAULT 'pending',
-            FOREIGN KEY (user_id) REFERENCES users(user_id)
-                ON DELETE CASCADE
+            status TEXT DEFAULT 'pending',
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
         )               
         """))
     
         #ORDER ITEM (DETAIL)
         conn.execute(text("""
         CREATE TABLE IF NOT EXISTS order_items(
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            order_id INT NOT NULL,
-            menu_id INT NOT NULL,
-            quantity INT NOT NULL,
-            price DECIMAL(12,2) NOT NULL,
-            subtotal DECIMAL (12,2) NOT NULL,
-            FOREIGN KEY (order_id) REFERENCES orders(id)
-                ON DELETE CASCADE,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL,
+            menu_id INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
+            price REAL NOT NULL, 
+            subtotal REAL NOT NULL,
+            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
             FOREIGN KEY (menu_id) REFERENCES food_menu(id)
         )
         """))
@@ -44,7 +42,7 @@ def generate_daily_invoice():
         count = conn.execute(text("""
             SELECT COUNT(*)
             FROM orders
-            WHERE DATE (order_date) = CURDATE()               
+            WHERE DATE (order_date) = date('now')               
         """)).scalar()
     
         count_today = count + 1
@@ -180,7 +178,7 @@ def get_daily_sales():
             SELECT COUNT(*) as total_orders, 
                 SUM(total_price) as total_revenue
             FROM orders
-            WHERE DATE(order_date) = CURDATE()
+            WHERE DATE(order_date) = date('now')
             AND status != 'cancelled'               
             """)
         ).mappings().first()
@@ -219,9 +217,9 @@ def pay_order(order_id):
             result = conn.execute(
                 text("""
                 UPDATE orders
-                SET STATUS = 'paid'
+                SET status = 'paid'
                 WHERE id=:id 
-                AND STATUS = 'pending'
+                AND status = 'pending'
                 """), 
                 {"id":order_id}
             )

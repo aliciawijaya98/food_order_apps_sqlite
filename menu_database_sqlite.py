@@ -8,11 +8,11 @@ def init_menu_table():
         # Create the food_menu table if it doesn't exist
         conn.execute(text('''
         CREATE TABLE IF NOT EXISTS food_menu (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            category VARCHAR(50) NOT NULL,
-            item VARCHAR(200) NOT NULL,
-            price INT UNSIGNED NOT NULL,
-            CONSTRAINT unique_category_item UNIQUE  (category, item)
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT NOT NULL,
+            item TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            CONSTRAINT unique_category_item UNIQUE (category, item)
         )
         '''))
     
@@ -76,7 +76,7 @@ def add_menu_item(new_item):
         return True,"Item added successfully"
         
     except Exception as e:
-        if "Duplicate" in str(e):
+        if "UNIQUE constraint" in str(e):
             return False, "Menu already exists in this category."
         return False, f"Database error: {e}"
 
@@ -105,7 +105,7 @@ def update_menu_item(menu_id, category, item, price):
         return True,"Item updated successfully"
         
     except Exception as e:
-        if "Duplicate" in str(e):
+        if "UNIQUE constraint" in str(e):
             return False, "Duplicate item in this category."
         return False, f"Database error: {e}"
 
