@@ -11,7 +11,7 @@ Database_URL = (
 )
                 
 # engine untuk database restaurant
-engine_db = create_engine(
+engine = create_engine(
     Database_URL,
     pool_pre_ping=True
 )

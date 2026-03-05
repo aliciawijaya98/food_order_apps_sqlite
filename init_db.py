@@ -1,5 +1,5 @@
 from user_database_sqlite import init_users_table
-from menu_database_sqlite import init_db as init_menu_table
+from menu_database_sqlite import init_menu_table
 from order_database_sqlite import init_order_tables
 
 def init_all_tables():

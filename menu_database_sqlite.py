@@ -2,7 +2,7 @@ from database import engine
 from sqlalchemy import text
 
 # Initialize Menu_database_table
-def init_db():
+def init_menu_table():
     with engine.begin() as conn: 
     
         # Create the food_menu table if it doesn't exist
