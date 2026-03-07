@@ -7,7 +7,7 @@ engine = create_engine(
     Database_URL,
     echo=True, 
     future=True,
-    connect_arg={"check_same_thread": False}
+    connect_args={"check_same_thread": False}
 )
 
 # Init all tables
