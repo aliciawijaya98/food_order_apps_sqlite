@@ -49,15 +49,27 @@ def init_menu_table():
 # Get the database
 def get_menu():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT * FROM food_menu")) 
+        result = conn.execute(text("SELECT * FROM food_menu ORDER by category, item")) 
         return result.mappings().all()
     
-
+#Get 1 menu aja
+def get_menu_by_id(menu_id):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT * FROM food_menu WHERE id = :id"),
+            {"id": menu_id}
+        )
+        return result.mappings().first()
+    
 # Adding new item to the menu
 def add_menu_item(new_item):
     
     if not all(k in new_item for k in ("category","item","price")):
         return False, "Invalid menu data."
+    
+    #validasi harga
+    if new_item["price"] <= 0:
+        return False, "Price must be greater than 0."
         
     try: 
         with engine.begin() as conn:
@@ -82,6 +94,9 @@ def add_menu_item(new_item):
 
 # Update menu item
 def update_menu_item(menu_id, category, item, price):
+    
+    if price <= 0:
+        return False, "Price must be greater than 0."
 
     try:     
         with engine.begin() as conn:
@@ -116,10 +131,12 @@ def delete_menu_item(menu_id):
     try:
         with engine.begin() as conn:
         
-            conn.execute(
+            result = conn.execute(
                 text("DELETE FROM food_menu WHERE id = :id"),
                 {"id": menu_id}
             )    
+            if result.rowcount == 0:
+                return False, "Menu item not found."
             
             return True, "Item deleted successfully."
     
