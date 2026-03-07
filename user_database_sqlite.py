@@ -44,7 +44,13 @@ def register_user(data):
 
     if not all(field in data for field in required_fields):
         return False, "Incomplete registration data."
-
+    
+    try:
+        if int(data["age"]) <= 0:
+            return False, "Invalid age."
+    except ValueError:
+        return False, "Age must be a number."
+    
     try:
         
         with engine.begin() as conn:
@@ -66,7 +72,7 @@ def register_user(data):
                 "gender": data["gender"],
                 "age": data["age"],
                 "job": data["job"],
-                "hobby": ",".join(data["hobby"]),
+                "hobby": ",".join(data["hobby"]) if isinstance(data["hobby"], list) else data["hobby"],
                 "city": data["city"],
                 "rt": data["rt"],
                 "rw": data["rw"],
@@ -104,7 +110,10 @@ def login_user(user_id, password):
     if user["password"] != hash_password(password):
         return False, "Wrong password."
 
-    return True, user
+    user_dict = dict(user)
+    user_dict.pop("password", None)
+
+    return True, user_dict
 
 # GET USER BY USER_ID
 def get_user_by_userid(user_id):
@@ -119,9 +128,11 @@ def get_user_by_userid(user_id):
             {"user_id":user_id}
         ).mappings().first()
         
+    if user:
+        user = dict(user)
+        user.pop("password", None)
+
     return user
-
-
 
 # UPDATE USER
 
