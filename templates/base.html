@@ -6,10 +6,10 @@
 </head>
 <body>
 
+{% if not (request.endpoint == 'login' or request.endpoint == 'register') %}
 <nav class="navbar">
     <div class="nav-inner">
         {% if session.get('user_id') %}
-
             <a href="{{ url_for('index') }}">Home</a>
             <a href="{{ url_for('menu') }}">Menu</a>
             <a href="{{ url_for('orders') }}">Orders</a>
@@ -18,16 +18,13 @@
                 {{ session['user_id'] }}
             </span>
             <a href="{{ url_for('logout') }}">Logout</a>
-        
         {% else %}
-            
             <a href="{{ url_for('login') }}">Login</a>
             <a href="{{ url_for('register') }}">Register</a>
-
         {% endif %}
-
     </div>
 </nav>
+{% endif %}
 
 <main class="page">
 
