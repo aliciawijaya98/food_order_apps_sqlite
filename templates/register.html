@@ -1,72 +1,101 @@
 {% extends "base.html" %}
-{% block title %}Register{% endblock %}
+
 {% block content %}
 
-<h1>Register</h1>
+<h2>Register</h2>
 
-{% if error %}
-<p style="color:red">{{ error }}</p>
-{% endif %}
+<div class="container">
 
-<form method="post">
+<form method="POST">
 
-    <label for="uid">User ID</label><br>
-    <input type="text" name="uid" id="uid" required><br><br>
+<div class="form-group">
+<label>User ID</label>
+<input type="text" name="user_id" required>
+</div>
 
-    <label for="pw">Password</label><br>
-    <input type="password" name="pw" id="pw" required><br><br>
+<div class="form-group">
+<label>Password</label>
+<input type="password" name="password" required>
+</div>
 
-    <label for="email">Email</label><br>
-    <input type="email" name="email" id="email" required><br><br>
+<div class="form-group">
+<label>Email</label>
+<input type="email" name="email" required>
+</div>
 
-    <label for="name">Name</label><br>
-    <input type="text" name="name" id="name" required><br><br>
+<div class="form-group">
+<label>Name</label>
+<input type="text" name="name" required>
+</div>
 
-    <label for="gender">Gender</label><br>
-    <select name="gender" id="gender" required>
-    <option value="">Select Gender</option>
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-    </select>
-    <br><br>
+<div class="form-group">
+<label>Gender</label>
+<select name="gender" required>
+<option value="">Select Gender</option>
+<option value="male">Male</option>
+<option value="female">Female</option>
+</select>
+</div>
 
-    <label for="age">Age</label><br>
-    <input type="number" name="age" id="age" required><br><br>
+<div class="form-group">
+<label>Age</label>
+<input type="number" name="age" required>
+</div>
 
-    <label for="job">Job</label><br>
-    <input type="text" name="job" id="job" required><br><br>
+<div class="form-group">
+<label>Job</label>
+<input type="text" name="job">
+</div>
 
-    <label for="hobbies">Hobbies (comma-separated)</label><br>
-    <input type="text" name="hobbies" id="hobbies" required><br><br>
+<div class="form-group">
+<label>Hobby</label>
+<input type="text" name="hobby">
+</div>
 
-    <label for="city">City</label><br>
-    <input type="text" name="city" id="city" required><br><br>
+<div class="form-group">
+<label>City</label>
+<input type="text" name="city">
+</div>
 
-    <label for="rt">RT</label><br>
-    <input type="text" name="rt" id="rt" required><br><br>
+<div class="form-group">
+<label>RT</label>
+<input type="text" name="rt">
+</div>
 
-    <label for="rw">RW</label><br>
-    <input type="text" name="rw" id="rw" required><br><br>
+<div class="form-group">
+<label>RW</label>
+<input type="text" name="rw">
+</div>
 
-    <label for="zip">ZIP</label><br>
-    <input type="text" name="zip" id="zip" required><br><br>
+<div class="form-group">
+<label>ZIP Code</label>
+<input type="text" name="zip">
+</div>
 
-    <label for="lat">Latitude</label><br>
-    <input type="text" name="lat" id="lat" required><br><br>
+<div class="form-group">
+<label>Latitude</label>
+<input type="text" name="latitude">
+</div>
 
-    <label for="long">Longitude</label><br>
-    <input type="text" name="long" id="long" required><br><br>
+<div class="form-group">
+<label>Longitude</label>
+<input type="text" name="longitude">
+</div>
 
-    <label for="phone">Phone</label><br>
-    <input type="text" name="phone" id="phone" required><br><br>
+<div class="form-group">
+<label>Phone</label>
+<input type="text" name="phone">
+</div>
 
-    <button type="submit">Register</button>
+<button type="submit">Register</button>
 
 </form>
 
-<br>
-<p>Already have an account?
-   <a href="{{ url_for('login') }}">Login here</a>
+<p>
+Already have an account?
+<a href="{{ url_for('login') }}">Login here</a>
 </p>
+
+</div>
 
 {% endblock %}
