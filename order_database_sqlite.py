@@ -162,7 +162,7 @@ def get_order_detail(order_id):
     
         items = conn.execute(
             text("""
-            SELECT oi.quantity, oi.price, oi.subtotal, m.item
+            SELECT oi.id, oi.quantity, oi.price, oi.subtotal, m.item
             FROM order_items oi
             JOIN food_menu m ON oi.menu_id=m.id
             WHERE oi.order_id=:id
