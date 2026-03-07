@@ -2,100 +2,140 @@
 
 {% block content %}
 
-<h2>Register</h2>
+<h1 class="welcome-title">RESTOAPPS MEMBER REGISTRATION</h1>
 
 <div class="container">
+  {% if error %}
+  <div class="flash">{{ error }}</div>
+  {% endif %}
 
-<form method="POST">
+  <form method="POST">
 
-<div class="form-group">
-<label>User ID</label>
-<input type="text" name="user_id" required>
-</div>
+    <!-- UserID -->
+    <div class="form-group">
+      <label for="user_id">User ID</label>
+      <input type="text" id="user_id" name="user_id" required
+             pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9._]{6,20}"
+             title="6–20 chars, must include letters and numbers, allowed: . _">
+      <span class="hint">
+        - Length 6–20 characters<br>
+        - Must include at least one letter and one number<br>
+        - Allowed characters: letters, numbers, dot (.) and underscore (_)
+      </span>
+    </div>
 
-<div class="form-group">
-<label>Password</label>
-<input type="password" name="password" required>
-</div>
+    <!-- Password -->
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required minlength="8"
+             title="Min 8 chars, include upper/lowercase, number, special (/.,@#$%)">
+      <span class="hint">
+        - Minimum 8 characters<br>
+        - Include uppercase and lowercase letters<br>
+        - Include at least one number<br>
+        - Include one special character: / . , @ # $ %
+      </span>
+    </div>
 
-<div class="form-group">
-<label>Email</label>
-<input type="email" name="email" required>
-</div>
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required
+             pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,5}"
+             title="Must be a valid email, e.g. user@mail.com">
+      <span class="hint">
+        - Must contain '@'<br>
+        - Must contain a dot (.) after the domain<br>
+        - Example: user@mail.com
+      </span>
+    </div>
 
-<div class="form-group">
-<label>Name</label>
-<input type="text" name="name" required>
-</div>
+    <!-- Name -->
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required pattern="[A-Za-z ]+">
+      <span class="hint">- Letters only, spaces allowed</span>
+    </div>
 
-<div class="form-group">
-<label>Gender</label>
-<select name="gender" required>
-<option value="">Select Gender</option>
-<option value="male">Male</option>
-<option value="female">Female</option>
-</select>
-</div>
+    <!-- Gender -->
+    <div class="form-group">
+      <label for="gender">Gender</label>
+      <select id="gender" name="gender" required>
+        <option value="">-- Choose Gender --</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
 
-<div class="form-group">
-<label>Age</label>
-<input type="number" name="age" required>
-</div>
+    <!-- Age -->
+    <div class="form-group">
+      <label for="age">Age</label>
+      <input type="number" id="age" name="age" min="17" max="80" required>
+      <span class="hint">- Must be between 17 and 80</span>
+    </div>
 
-<div class="form-group">
-<label>Job</label>
-<input type="text" name="job">
-</div>
+    <!-- Job -->
+    <div class="form-group">
+      <label for="job">Job</label>
+      <input type="text" id="job" name="job" required pattern="[A-Za-z ]+">
+      <span class="hint">- Letters only</span>
+    </div>
 
-<div class="form-group">
-<label>Hobby</label>
-<input type="text" name="hobby">
-</div>
+    <!-- Hobby -->
+    <div class="form-group">
+      <label for="hobby">Hobby</label>
+      <input type="text" id="hobby" name="hobby" placeholder="Reading, Swimming" required pattern="[A-Za-z ,]+">
+      <span class="hint">- Minimum two hobbies, separate using comma<br>- Letters only</span>
+    </div>
 
-<div class="form-group">
-<label>City</label>
-<input type="text" name="city">
-</div>
+    <!-- Address -->
+    <div class="form-group">
+      <label for="city">City</label>
+      <input type="text" id="city" name="city" required pattern="[A-Za-z ]+">
+      <span class="hint">- Letters only</span>
+    </div>
 
-<div class="form-group">
-<label>RT</label>
-<input type="text" name="rt">
-</div>
+    <div class="form-group">
+      <label for="rt">RT</label>
+      <input type="text" id="rt" name="rt" required pattern="\d+">
+      <span class="hint">- Numeric only</span>
+    </div>
 
-<div class="form-group">
-<label>RW</label>
-<input type="text" name="rw">
-</div>
+    <div class="form-group">
+      <label for="rw">RW</label>
+      <input type="text" id="rw" name="rw" required pattern="\d+">
+      <span class="hint">- Numeric only</span>
+    </div>
 
-<div class="form-group">
-<label>ZIP Code</label>
-<input type="text" name="zip">
-</div>
+    <div class="form-group">
+      <label for="zipcode">Zip Code</label>
+      <input type="text" id="zipcode" name="zipcode" required pattern="\d{5}">
+      <span class="hint">- 5 digits only</span>
+    </div>
 
-<div class="form-group">
-<label>Latitude</label>
-<input type="text" name="latitude">
-</div>
+    <!-- Coordinates -->
+    <div class="form-group">
+      <label for="latitude">Latitude</label>
+      <input type="text" id="latitude" name="latitude" required pattern="-?\d+(\.\d+)?">
+      <span class="hint">- Example: -6.200</span>
+    </div>
 
-<div class="form-group">
-<label>Longitude</label>
-<input type="text" name="longitude">
-</div>
+    <div class="form-group">
+      <label for="longitude">Longitude</label>
+      <input type="text" id="longitude" name="longitude" required pattern="-?\d+(\.\d+)?">
+      <span class="hint">- Example: 106.816</span>
+    </div>
 
-<div class="form-group">
-<label>Phone</label>
-<input type="text" name="phone">
-</div>
+    <!-- Phone -->
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="text" id="phone" name="phone" required pattern="\d{11,13}">
+      <span class="hint">- Numeric only, 11–13 digits</span>
+    </div>
 
-<button type="submit">Register</button>
+    <button type="submit">Register</button>
 
-</form>
-
-<p>
-Already have an account?
-<a href="{{ url_for('login') }}">Login here</a>
-</p>
-
+  </form>
 </div>
 
 {% endblock %}

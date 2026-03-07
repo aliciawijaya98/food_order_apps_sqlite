@@ -96,7 +96,7 @@ def validate_password(pw):
 #Dashboard
 @app.route("/")
 def index():
-    if"user id" not in session:
+    if"user_id" not in session:
         return redirect(url_for("login"))
      
     user = get_user_by_userid(session["user_id"])
@@ -130,13 +130,13 @@ def register():
             "gender": form["gender"],
             "age": form["age"],
             "job": form["job"],
-            "hobby": form.getlist("hobby"),
+            "hobby": [h.strip() for h in form["hobby"].split(",")],
             "city": form["city"],
             "rt": form["rt"],
             "rw": form["rw"],
             "zip": form["zip"],
-            "latitude": form["latitude"],
-            "longitude": form["longitude"],
+            "latitude": float(form["latitude"]),
+            "longitude": float(form["longitude"]),
             "phone": form["phone"]
         }
 
