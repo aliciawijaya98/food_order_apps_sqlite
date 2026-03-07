@@ -49,7 +49,7 @@ def init_menu_table():
 # Get the database
 def get_menu():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT * FROM food_menu ORDER by category, item")) 
+        result = conn.execute(text("SELECT * FROM food_menu ORDER by id ASC")) 
         return result.mappings().all()
     
 #Get 1 menu aja
