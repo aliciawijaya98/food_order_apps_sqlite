@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Create Order</h2>
+
+<form method="POST">
+
+<label>Order Type</label>
+
+<select name="order_type">
+
+<option value="Dine-in">Dine-in</option>
+<option value="Takeaway">Takeaway</option>
+
+</select>
+
+<label>Table Number (Dine-in)</label>
+
+<input type="number" name="reference_number">
+
+<button type="submit">Create Order</button>
+
+</form>
+
+{% endblock %}

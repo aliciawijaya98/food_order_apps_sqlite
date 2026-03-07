@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Order Detail</h2>
+
+<div class ="order-header">
+<p><b>Invoice:</b> {{ order.invoice_code }}</p>
+<p><b>Status:</b> {{ order.status }}</p>
+<p><b>Total:</b> Rp {{ order.total_price }}</p>
+
+</div>
+
+<div class="add-item-form">
+
+<h3>Add Menu Item</h3>
+
+<form method="POST" action="{{ url_for('add_item', order_id=order.id) }}">
+
+<select name="menu_id" id="menu_select">
+
+{% for m in menus %}
+
+<option value="{{ m.id }}" data-price="{{ m.price }}">
+
+{{ m.category }} - {{ m.item }} (Rp {{ m.price }})
+
+</option>
+
+{% endfor %}
+
+</select>
+
+<input type="number" name="quantity" value="1" min="1">
+
+<input type="hidden" name="price" id="menu_price">
+
+<button type="submit">Add Item</button>
+
+</form>
+
+</div>
+
+<br>
+
+<table class="order-table">
+
+<tr>
+<th>Item</th>
+<th>Qty</th>
+<th>Price</th>
+<th>Subtotal</th>
+<th>Action</th>
+
+</tr>
+
+{% for item in items %}
+
+<tr>
+<td>{{ item.item }}</td>
+<td>{{ item.quantity }}</td>
+<td>{{ item.price }}</td>
+<td>{{ item.subtotal }}</td>
+
+<td>
+
+<a href="{{ url_for('delete_order_item',
+order_id=order.id,
+item_id=item.id) }}">
+
+Delete
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
+
+<form method="POST" action="{{ url_for('pay_order_route', order_id=order.id) }}">
+<button>Pay Order</button>
+</form>
+
+<script>
+
+const select = document.getElementById("menu_select")
+const priceInput = document.getElementById("menu_price")
+
+function updatePrice(){
+    const price = select.options[select.selectedIndex].dataset.price
+    priceInput.value = price
+}
+
+updatePrice()
+select.addEventListener("change", updatePrice)
+
+</script>
+
+{% endblock %}

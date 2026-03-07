@@ -1,5 +1,31 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2>Welcome, {{ user }}</h2>
-<p>Use the navigation to manage menu or place orders.</p>
+
+<h2>Dashboard</h2>
+
+<p>Welcome {{ user.name }}</p>
+
+<div class="dashboard">
+
+    <div class="card">
+        <h3>Menu Management</h3>
+        <p>View and manage restaurant menu.</p>
+        <a href="{{ url_for('menu') }}">Go to Menu</a>
+    </div>
+
+    <div class="card">
+        <h3>Orders</h3>
+        <p>Create and manage customer orders.</p>
+        <a href="{{ url_for('orders') }}">View Orders</a>
+    </div>
+
+    <div class="card">
+        <h3>Profile</h3>
+        <p>Update your account information.</p>
+        <a href="{{ url_for('profile') }}">Edit Profile</a>
+    </div>
+
+</div>
+
 {% endblock %}
