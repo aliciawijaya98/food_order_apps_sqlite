@@ -1,72 +1,148 @@
 {% extends "base.html" %}
-{% block title %}Register{% endblock %}
+
 {% block content %}
 
-<h1>Register</h1>
+<h2>Member Registration</h2>
 
 {% if error %}
-<p style="color:red">{{ error }}</p>
+<div class="flash">{{ error }}</div>
 {% endif %}
 
-<form method="post">
+<form method="POST">
 
-    <label for="uid">User ID</label><br>
-    <input type="text" name="uid" id="uid" required><br><br>
+<!-- UserID -->
+<h3>UserID</h3>
+<span class="hint">
+- Length 6–20 characters <br>
+- Must contain at least one letter and one number <br>
+- Allowed characters: letters, numbers, dot (.) and underscore (_)
+</span>
+<input type="text" name="user_id" required pattern="[A-Za-z0-9._]{6,20}" title="6–20 chars, letters, numbers, dot, underscore">
 
-    <label for="pw">Password</label><br>
-    <input type="password" name="pw" id="pw" required><br><br>
+<br><br>
 
-    <label for="email">Email</label><br>
-    <input type="email" name="email" id="email" required><br><br>
+<!-- Password -->
+<h3>Password</h3>
+<span class="hint">
+- Minimum 8 characters <br>
+- Must include uppercase and lowercase letters <br>
+- Must include at least one number <br>
+- Must include one special character: / . , @ # $ %
+</span>
+<input type="password" name="password" required minlength="8" title="Min 8 chars, include upper/lower, number, special">
 
-    <label for="name">Name</label><br>
-    <input type="text" name="name" id="name" required><br><br>
+<br><br>
 
-    <label for="gender">Gender</label><br>
-    <select name="gender" id="gender" required>
-    <option value="">Select Gender</option>
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-    </select>
-    <br><br>
+<!-- Email -->
+<h3>Email</h3>
+<span class="hint">
+- Must contain '@' <br>
+- Must contain a dot (.) after the domain <br>
+- Example: user@mail.com
+</span>
+<input type="text" name="email" required>
 
-    <label for="age">Age</label><br>
-    <input type="number" name="age" id="age" required><br><br>
+<br><br>
 
-    <label for="job">Job</label><br>
-    <input type="text" name="job" id="job" required><br><br>
+<!-- Name -->
+<h3>Name</h3>
+<span class="hint">
+- Letters only <br>
+- Spaces allowed
+</span>
+<input type="text" name="name" required pattern="[A-Za-z ]+">
 
-    <label for="hobbies">Hobbies (comma-separated)</label><br>
-    <input type="text" name="hobbies" id="hobbies" required><br><br>
+<br><br>
 
-    <label for="city">City</label><br>
-    <input type="text" name="city" id="city" required><br><br>
+<!-- Gender -->
+<h3>Gender</h3>
+<select name="gender" required>
+<option value="">-- Choose Gender --</option>
+<option value="Male">Male</option>
+<option value="Female">Female</option>
+</select>
 
-    <label for="rt">RT</label><br>
-    <input type="text" name="rt" id="rt" required><br><br>
+<br><br>
 
-    <label for="rw">RW</label><br>
-    <input type="text" name="rw" id="rw" required><br><br>
+<!-- Age -->
+<h3>Age</h3>
+<span class="hint">
+- Must be between 17 and 80
+</span>
+<input type="number" name="age" min="17" max="80" required>
 
-    <label for="zip">ZIP</label><br>
-    <input type="text" name="zip" id="zip" required><br><br>
+<br><br>
 
-    <label for="lat">Latitude</label><br>
-    <input type="text" name="lat" id="lat" required><br><br>
+<!-- Job -->
+<h3>Job</h3>
+<span class="hint">
+- Letters only
+</span>
+<input type="text" name="job" required pattern="[A-Za-z ]+">
 
-    <label for="long">Longitude</label><br>
-    <input type="text" name="long" id="long" required><br><br>
+<br><br>
 
-    <label for="phone">Phone</label><br>
-    <input type="text" name="phone" id="phone" required><br><br>
+<!-- Hobby -->
+<h3>Hobby</h3>
+<span class="hint">
+- Minimum two hobbies <br>
+- Separate hobbies using comma <br>
+- Letters only
+</span>
+<input type="text" name="hobby" placeholder="Reading, Swimming" required pattern="[A-Za-z ,]+">
 
-    <button type="submit">Register</button>
+<br><br>
+
+<!-- Address Fields -->
+<h3>City</h3>
+<span class="hint">Letters only</span>
+<input type="text" name="city" required pattern="[A-Za-z ]+">
+
+<br><br>
+
+<h3>RT</h3>
+<span class="hint">Numeric only</span>
+<input type="text" name="rt" required pattern="\d+">
+
+<br><br>
+
+<h3>RW</h3>
+<span class="hint">Numeric only</span>
+<input type="text" name="rw" required pattern="\d+">
+
+<br><br>
+
+<h3>Zip Code</h3>
+<span class="hint">5 digits only</span>
+<input type="text" name="zipcode" required pattern="\d{5}">
+
+<br><br>
+
+<!-- Coordinates -->
+<h3>Latitude</h3>
+<span class="hint">Example: -6.200</span>
+<input type="text" name="latitude" required pattern="-?\d+(\.\d+)?">
+
+<br><br>
+
+<h3>Longitude</h3>
+<span class="hint">Example: 106.816</span>
+<input type="text" name="longitude" required pattern="-?\d+(\.\d+)?">
+
+<br><br>
+
+<!-- Phone -->
+<h3>Phone Number</h3>
+<span class="hint">
+- Numeric only <br>
+- Length 11–13 digits
+</span>
+<input type="text" name="phone" required pattern="\d{11,13}">
+
+<br><br>
+
+<button type="submit">Register</button>
 
 </form>
-
-<br>
-<p>Already have an account?
-   <a href="{{ url_for('login') }}">Login here</a>
-</p>
 
 {% endblock %}
