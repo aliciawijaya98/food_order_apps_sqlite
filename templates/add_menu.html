@@ -1,19 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Add Menu Item{% endblock %}
 
 {% block content %}
-<h1>Add New Menu Item</h1>
 
-{% if msg %}
-<p style="color:green">{{ msg }}</p>
-{% endif %}
+<h2>Add Menu</h2>
 
-<form method="post">
-    Category: <input type="text" name="category" required><br><br>
-    Item Name: <input type="text" name="name" required><br><br>
-    Price: <input type="number" name="price" required><br><br>
-    <button type="submit">Add Item</button>
+<form method="POST">
+
+<label>Category</label>
+<input type="text" name="category" required>
+
+<label>Item</label>
+<input type="text" name="item" required>
+
+<label>Price</label>
+<input type="number" name="price" required>
+
+<button type="submit">Add Menu</button>
+
 </form>
 
-<a href="{{ url_for('menu') }}">Back to Menu</a>
 {% endblock %}
