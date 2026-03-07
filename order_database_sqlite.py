@@ -33,29 +33,18 @@ def init_order_tables():
             FOREIGN KEY (menu_id) REFERENCES food_menu(id)
         )
         """))
-
-#Generate Daily Invoice
-def generate_daily_invoice():
-    
-    with engine.connect() as conn:
-            
-        count = conn.execute(text("""
-            SELECT COUNT(*)
-            FROM orders
-            WHERE DATE (order_date) = date('now')               
-        """)).scalar()
-    
-        count_today = count + 1
-        today_str = datetime.now().strftime("%Y%m%d")
-    
-        invoice_code = f"{today_str}-{count_today:03d}"
-    
-        return invoice_code
-
+        
 #CREATE ORDER (HEADER)
 def create_order(user_id, order_type, reference_number):
     if order_type not in ["Dine-in", "Takeaway"]:
         return None, "Invalid order type."
+    
+    if order_type == "Dine-in":
+        if reference_number is None:
+            return None, "Table number is required for Dine-in."
+        active_order = check_active_table(reference_number)
+        if active_order:
+            return None, f"Table {reference_number} already has an active order."
     
     try:
         
@@ -95,9 +84,24 @@ def create_order(user_id, order_type, reference_number):
 #ADD ORDER ITEM (DETAIL)
 def add_order_item(order_id, menu_id, quantity, price):
     
+    if quantity <= 0:
+        return False, "Quantity must be greater than 0."
+    
     try:
         with engine.begin() as conn:
-        
+            
+            #cek status order
+            order_status = conn.execute(
+                text("SELECT status FROM orders WHERE id=:id"),
+                {"id": order_id}
+            ).scalar()
+            
+            if order_status is None:
+                return False, "Order not found."
+
+            if order_status != "pending":
+                return False, "Cannot add item. Order already closed."
+            
             subtotal = quantity * price
         
             conn.execute(
@@ -152,6 +156,9 @@ def get_order_detail(order_id):
             """), 
             {"id":order_id}
         ).mappings().first()
+        
+        if order is None:
+            return None
     
         items = conn.execute(
             text("""
