@@ -159,7 +159,7 @@ def login():
 
         if success:
             session["user_id"] = user_id
-            flash("Login successful")
+            flash("Login successful.")
             return redirect(url_for("index"))
         else:
             flash(result)
@@ -185,6 +185,7 @@ def profile():
             "name": request.form["name"],
             "email": request.form["email"],
             "job": request.form["job"],
+            "hobby": ",".join([h.strip() for h in request.form["hobby"].split(",")]),
             "phone": request.form["phone"],
             "city": request.form["city"],
             "rt": request.form["rt"],
@@ -200,27 +201,56 @@ def profile():
     user = get_user_by_userid(user_id)
     return render_template("profile.html", user=user)
 
+# EDIT PROFILE
+@app.route("/edit_profile", methods=["GET","POST"])
+def edit_profile():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    user = get_user_by_userid(user_id)
+
+    msg = None
+    if request.method == "POST":
+        hobby_input = request.form.get("hobby", "")
+        updated_data = {
+            "name": request.form.get("name", user.get("name", "")),
+            "email": request.form.get("email", user.get("email", "")),
+            "job": request.form.get("job", user.get("job", "")),
+            "hobby": ",".join([h.strip() for h in hobby_input.split(",")]),
+            "phone": request.form.get("phone", user.get("phone", "")),
+            "city": request.form.get("city", user.get("city", "")),
+            "rt": request.form.get("rt", user.get("rt", "")),
+            "rw": request.form.get("rw", user.get("rw", "")),
+            "zip": request.form.get("zip", user.get("zip", "")),
+            "latitude": request.form.get("latitude", user.get("latitude", "")),
+            "longitude": request.form.get("longitude", user.get("longitude", ""))
+        }
+
+        success, message = update_user(user_id, updated_data)
+        msg = message
+        user = get_user_by_userid(user_id)  # refresh data
+        return redirect(url_for("profile"))
+
+    return render_template("edit_profile.html", user=user, msg=msg)
+
 # DELETE ACCOUNT
-@app.route("/delete_account", methods=["POST"])
+@app.route("/delete_account", methods=["GET", "POST"])
 def delete_account():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    success, message = delete_user(session["user_id"])
-    session.clear()
-    flash(message)
-    return redirect(url_for("register"))
+    msg = None
+    if request.method == "POST":
+        # baru hapus user ketika klik tombol Yes
+        success, message = delete_user(session["user_id"])
+        session.clear()
+        msg = message
+        return render_template("delete_account.html", msg=msg)
 
-# ADMIN VIEW
-@app.route("/users")
-def users():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-    all_users = get_all_users()
-    return render_template("users.html", users=all_users)
+    return render_template("delete_account.html")
 
-
-#View Menu
+# VIEW MENU
 @app.route("/menu")
 def menu():
     
@@ -231,7 +261,7 @@ def menu():
     
     return render_template("menu.html",menus=menus)
 
-#Add Menu
+# ADD MENU
 @app.route("/menu/add", methods = ["GET","POST"])
 def add_menu():
     
@@ -255,7 +285,7 @@ def add_menu():
     
     return render_template("add_menu.html")
 
-#Edit Menu
+# EDIT MENU
 @app.route("/menu/edit/<int:menu_id>", methods=["GET","POST"])
 def edit_menu(menu_id):
     
@@ -279,7 +309,7 @@ def edit_menu(menu_id):
     
     return render_template("edit_menu.html", menu=menu)
 
-#Delete Menu
+# DELETE MENU
 @app.route("/menu/delete/<int:menu_id>")
 def delete_menu(menu_id):
 
@@ -292,18 +322,41 @@ def delete_menu(menu_id):
 
     return redirect(url_for("menu"))
 
-#Order Dashboard
-@app.route("/orders")
+# ORDER DASHBOARD
+@app.route("/orders", methods=["GET","POST"])
 def orders():
-
     if "user_id" not in session:
         return redirect(url_for("login"))
 
     sales = get_daily_sales()
+    found_order = None
+    search_attempted = False
 
-    return render_template("orders.html", sales=sales)
+    if request.method == "POST":
+        search_attempted = True
+        keyword = request.form.get("keyword", "").strip()
 
-#Create Order Page
+        order_id = find_order_id(keyword)
+
+        if order_id:
+            order_data = get_order_detail(order_id)
+            if order_data:
+                # langsung render order_detail read-only
+                return render_template(
+                    "order_detail.html",
+                    order=order_data["order"],
+                    items=order_data["items"],
+                    menus=get_menu(),
+                    editable=False
+                )
+        # kalau tidak ketemu
+        flash("Order not found")
+
+    return render_template("orders.html", sales=sales,
+                           search_attempted=search_attempted,
+                           found_order=found_order)
+
+# CREATE ORDER
 @app.route("/orders/create", methods=["GET","POST"])
 def create_order_page():
 
@@ -322,13 +375,13 @@ def create_order_page():
         )
 
         if order_id:
-            return redirect(url_for("order_detail", order_id=order_id))
+            return redirect(url_for("order_detail", order_id=order_id, editable=1))
 
         flash(invoice)
 
     return render_template("create_order.html")
 
-# Order Detail
+# ORDER DETAIL
 @app.route("/orders/<int:order_id>")
 def order_detail(order_id):
 
@@ -343,14 +396,18 @@ def order_detail(order_id):
 
     menus = get_menu()
 
+    editable = request.args.get("editable", default=1, type=int)
+    editable = bool(editable)
+
     return render_template(
         "order_detail.html",
         order=order_data["order"],
         items=order_data["items"],
-        menus=menus
+        menus=menus,
+        editable=editable
     )
 
-#Add item to Order
+# ADD ITEM TO ORDER
 @app.route("/orders/<int:order_id>/add", methods=["POST"])
 def add_item(order_id):
 
@@ -367,7 +424,7 @@ def add_item(order_id):
 
     return redirect(url_for("order_detail", order_id=order_id))
 
-#Pay Order
+# PAY ORDER
 @app.route("/orders/pay/<int:order_id>", methods=["POST"])
 def pay_order_route(order_id):
 
@@ -377,7 +434,7 @@ def pay_order_route(order_id):
 
     return redirect(url_for("orders")) 
 
-# Delete item on order
+# DELETE ITEM ON ORDER
 @app.route("/orders/<int:order_id>/delete_item/<int:item_id>")
 def delete_order_item(order_id, item_id):
 

@@ -6,18 +6,15 @@
 
 <form method="POST">
 
-<label>Order Type</label>
+<label>Order Type</label><br>
 
-<select name="order_type">
+<select name="order_type"><br>
+    <option value="Dine-in">Dine-in</option>
+    <option value="Takeaway">Takeaway</option>
+</select><br><br>
 
-<option value="Dine-in">Dine-in</option>
-<option value="Takeaway">Takeaway</option>
-
-</select>
-
-<label>Table Number (Dine-in)</label>
-
-<input type="number" name="reference_number">
+<label>Table/Invoice Number</label><br>
+<input type="number" name="reference_number"><br><br>
 
 <button type="submit">Create Order</button>
 

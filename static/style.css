@@ -22,6 +22,7 @@ body {
     background-color: #ff6f3c;
 }
 
+.nav-user,
 .navbar a{
     color:white;
     text-decoration:none;
@@ -148,19 +149,13 @@ td {
 }
 
 th {
-    background-color: #ffb18c;
+    background-color: #ff6f3c;
     color: white;
     font-weight: 600;
 }
 
 tr:nth-child(even) {
     background-color: #fff2e6;
-}
-
-/* align numeric columns */
-td:nth-child(2),
-td:nth-child(4) {
-    text-align: right;
 }
 
 /* ORDER TOTAL */

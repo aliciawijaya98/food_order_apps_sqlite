@@ -13,7 +13,7 @@ Identifier (Table # or Invoice #): <input type="text" name="identifier"><br>
 <h3>Menu</h3>
 {% for idx, item in enumerate(menu) %}
 <div class="card">
-<p>{{ item.item }} (Rp{{ item.price }})</p>
+<p>{{ item.item }} (Rp{{ "{:,}".format(item.price|int).replace(',', '.') }})</p>
 Quantity: <input type="number" name="qty_{{ idx }}" min="0" value="0">
 </div>
 {% endfor %}

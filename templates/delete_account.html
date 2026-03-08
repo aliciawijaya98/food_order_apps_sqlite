@@ -10,10 +10,14 @@
     <a href="{{ url_for('login') }}">Login</a>
 {% else %}
     <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-    <form method="post">
+    <form method="post" style="display:inline-block;">
         <button type="submit">Yes, Delete My Account</button>
     </form>
-    <a href="{{ url_for('profile') }}">Cancel</a>
+
+    <!-- Tombol untuk Cancel -->
+    <form action="{{ url_for('profile') }}" method="get" style="display:inline-block;">
+        <button type="submit">Cancel</button>
+    </form>
 {% endif %}
 
 {% endblock %}

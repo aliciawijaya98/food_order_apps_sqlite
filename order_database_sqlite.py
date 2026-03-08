@@ -261,7 +261,6 @@ def find_order_id(keyword):
             text("""
                 SELECT id FROM orders
                 WHERE reference_number=:table
-                AND status = 'pending'
                 """), 
                 {"table":int(keyword)}
             ).first()

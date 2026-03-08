@@ -14,9 +14,8 @@
             <a href="{{ url_for('menu') }}">Menu</a>
             <a href="{{ url_for('orders') }}">Orders</a>
 
-            <span class="nav-user">
-                {{ session['user_id'] }}
-            </span>
+            <a href="{{ url_for('profile') }}" class="nav-user">Profile</a>
+
             <a href="{{ url_for('logout') }}">Logout</a>
         {% else %}
             <a href="{{ url_for('login') }}">Login</a>

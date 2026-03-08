@@ -5,33 +5,29 @@
 <h2>Orders</h2>
 
 <div class="dashboard">
+    <div class="card">
+        <h3>Today's Orders</h3>
+        <p>{{ sales.total_orders }}</p>
+    </div>
 
-<div class="card">
-<h3>Today's Orders</h3>
-<p>{{ sales.total_orders }}</p>
-</div>
-
-<div class="card">
-<h3>Revenue Today</h3>
-<p>Rp {{ sales.total_revenue }}</p>
-</div>
-
+    <div class="card">
+        <h3>Revenue Today</h3>
+        <p>{{ "Rp {:,}".format(sales.total_revenue|int).replace(',', '.') }}</p>
+    </div>
 </div>
 
 <br>
 
 <a href="{{ url_for('create_order_page') }}">
-<button>Create Order</button>
+    <button>Create Order</button>
 </a>
 
 <br><br>
 
+<!-- SEARCH FORM -->
 <form method="POST" action="{{ url_for('orders') }}">
-
-<input type="text" name="keyword" placeholder="Invoice Code / Table Number">
-
-<button type="submit">Find Order</button>
-
+    <input type="text" name="keyword" placeholder="Invoice / Table Number">
+    <button type="submit">Find Order</button>
 </form>
 
 {% endblock %}
