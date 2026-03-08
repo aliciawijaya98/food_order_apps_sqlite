@@ -1,23 +1,20 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 
 <h2>Create Order</h2>
 
 <form method="POST">
+  <label>Order Type</label><br />
 
-<label>Order Type</label><br>
-
-<select name="order_type"><br>
+  <select name="order_type">
+    <br />
     <option value="Dine-in">Dine-in</option>
-    <option value="Takeaway">Takeaway</option>
-</select><br><br>
+    <option value="Takeaway">Takeaway</option></select
+  ><br /><br />
 
-<label>Table/Invoice Number</label><br>
-<input type="number" name="reference_number"><br><br>
+  <label>Table/Invoice Number</label><br />
+  <input type="number" name="reference_number" /><br /><br />
 
-<button type="submit">Create Order</button>
-
+  <button type="submit">Create Order</button>
 </form>
 
 {% endblock %}

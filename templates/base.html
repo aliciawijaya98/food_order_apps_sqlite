@@ -1,45 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Restaurant App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-
-{% if not (request.endpoint == 'login' or request.endpoint == 'register') %}
-<nav class="navbar">
-    <div class="nav-inner">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    {% if not (request.endpoint == 'login' or request.endpoint == 'register') %}
+    <nav class="navbar">
+      <div class="nav-inner">
         {% if session.get('user_id') %}
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="{{ url_for('menu') }}">Menu</a>
-            <a href="{{ url_for('orders') }}">Orders</a>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('menu') }}">Menu</a>
+        <a href="{{ url_for('orders') }}">Orders</a>
 
-            <a href="{{ url_for('profile') }}" class="nav-user">Profile</a>
+        <a href="{{ url_for('profile') }}" class="nav-user">Profile</a>
 
-            <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
         {% else %}
-            <a href="{{ url_for('login') }}">Login</a>
-            <a href="{{ url_for('register') }}">Register</a>
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
         {% endif %}
-    </div>
-</nav>
-{% endif %}
+      </div>
+    </nav>
+    {% endif %}
 
-<main class="page">
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash-message">
-          {% for msg in messages %}
-            <p>{{ msg }}</p>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-
-    {% block content %}{% endblock %}
-
-</main>
-
-</body>
+    <main class="page">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div class="flash-message">
+        {% for msg in messages %}
+        <p>{{ msg }}</p>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+  </body>
 </html>

@@ -1,31 +1,24 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 
 <h2>Add Menu</h2>
 
 <form method="POST">
+  <label>Category</label>
+  <br />
+  <input type="text" name="category" required />
+  <br /><br />
 
-<label>Category</label>
-<br>
-<input type="text" name="category" required>
-<br><br>
+  <label>Item</label>
+  <br />
+  <input type="text" name="item" required />
+  <br /><br />
 
+  <label>Price</label>
+  <br />
+  <input type="number" name="price" required />
+  <br /><br />
 
-<label>Item</label>
-<br>
-<input type="text" name="item" required>
-<br><br>
-
-
-<label>Price</label>
-<br>
-<input type="number" name="price" required>
-<br><br>
-
-
-<button type="submit">Add Menu</button>
-
+  <button type="submit">Add Menu</button>
 </form>
 
 {% endblock %}

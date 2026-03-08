@@ -1,38 +1,33 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 
 <h2>Menu Management</h2>
 
 <a href="{{ url_for('add_menu') }}">
-<button>Add Menu</button>
+  <button>Add Menu</button>
 </a>
 
 <table>
+  <tr>
+    <th>Category</th>
+    <th>Item</th>
+    <th>Price</th>
+    <th>Action</th>
+  </tr>
 
-<tr>
-<th>Category</th>
-<th>Item</th>
-<th>Price</th>
-<th>Action</th>
-</tr>
+  {% for m in menus %}
 
-{% for m in menus %}
+  <tr>
+    <td>{{ m.category }}</td>
+    <td>{{ m.item }}</td>
+    <td>{{ "Rp {:,}".format(m.price|int).replace(',', '.') }}</td>
 
-<tr>
-<td>{{ m.category }}</td>
-<td>{{ m.item }}</td>
-<td>{{ "Rp {:,}".format(m.price|int).replace(',', '.') }}</td>
+    <td>
+      <a href="{{ url_for('edit_menu', menu_id=m.id) }}">Edit</a>
+      <a href="{{ url_for('delete_menu', menu_id=m.id) }}">Delete</a>
+    </td>
+  </tr>
 
-<td>
-<a href="{{ url_for('edit_menu', menu_id=m.id) }}">Edit</a>
-<a href="{{ url_for('delete_menu', menu_id=m.id) }}">Delete</a>
-</td>
-
-</tr>
-
-{% endfor %}
-
+  {% endfor %}
 </table>
 
 {% endblock %}

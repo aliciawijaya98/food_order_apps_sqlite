@@ -1,42 +1,44 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 
 <h2>Order Detail</h2>
 
 <div class="order-header">
-    <p><b>Invoice:</b> {{ order.invoice_code }}</p>
-    <p><b>Status:</b> {{ order.status }}</p>
-    <p><b>Total:</b> {{ "Rp {:,}".format(order.total_price|int).replace(',', '.') }}</p>
+  <p><b>Invoice:</b> {{ order.invoice_code }}</p>
+  <p><b>Status:</b> {{ order.status }}</p>
+  <p>
+    <b>Total:</b> {{ "Rp {:,}".format(order.total_price|int).replace(',', '.')
+    }}
+  </p>
 </div>
-
-
 
 {% if editable %}
 <div class="add-item-form">
-    <form method="POST" action="{{ url_for('add_item', order_id=order.id) }}">
-        <label for="menu_select"><b>Menu Item:</b></label><br>
-        <select name="menu_id" id="menu_select">
-            {% for m in menus %}
-            <option value="{{ m.id }}" data-price="{{ m.price }}">
-                {{ m.category }} - {{ m.item }} (Rp {{ "{:,}".format(m.price|int).replace(',', '.') }})
-            </option>
-            {% endfor %}
-        </select>
-        <br><br>
-        <label for="quantity"><b>Quantity:</b></label><br>
-        <input type="number" name="quantity" value="1" min="1">
-        <input type="hidden" name="price" id="menu_price">
-        <br><br>
-        <button type="submit">Add Item</button>
-    </form>
+  <form method="POST" action="{{ url_for('add_item', order_id=order.id) }}">
+    <label for="menu_select"><b>Menu Item:</b></label
+    ><br />
+    <select name="menu_id" id="menu_select">
+      {% for m in menus %}
+      <option value="{{ m.id }}" data-price="{{ m.price }}">
+        {{ m.category }} - {{ m.item }} (Rp {{
+        "{:,}".format(m.price|int).replace(',', '.') }})
+      </option>
+      {% endfor %}
+    </select>
+    <br /><br />
+    <label for="quantity"><b>Quantity:</b></label
+    ><br />
+    <input type="number" name="quantity" value="1" min="1" />
+    <input type="hidden" name="price" id="menu_price" />
+    <br /><br />
+    <button type="submit">Add Item</button>
+  </form>
 </div>
 {% endif %}
 
-<br>
+<br />
 
 <table class="order-table">
-<tr>
+  <tr>
     <th>Item</th>
     <th>Qty</th>
     <th>Price</th>
@@ -44,43 +46,46 @@
     {% if editable %}
     <th>Action</th>
     {% endif %}
-</tr>
+  </tr>
 
-{% for item in items %}
-<tr>
+  {% for item in items %}
+  <tr>
     <td>{{ item.item }}</td>
     <td>{{ item.quantity }}</td>
     <td>{{ "Rp {:,}".format(item.price|int).replace(',', '.') }}</td>
     <td>{{ "Rp {:,}".format(item.subtotal|int).replace(',', '.') }}</td>
     {% if editable %}
     <td>
-        <a href="{{ url_for('delete_order_item', order_id=order.id, item_id=item.id) }}">
-            Delete
-        </a>
+      <a
+        href="{{ url_for('delete_order_item', order_id=order.id, item_id=item.id) }}"
+      >
+        Delete
+      </a>
     </td>
     {% endif %}
-</tr>
-{% endfor %}
+  </tr>
+  {% endfor %}
 </table>
 
 {% if editable %}
-<br>
-<form method="POST" action="{{ url_for('pay_order_route', order_id=order.id) }}">
-    <button>Pay Order</button>
+<br />
+<form
+  method="POST"
+  action="{{ url_for('pay_order_route', order_id=order.id) }}"
+>
+  <button>Pay Order</button>
 </form>
 
 <script>
-const select = document.getElementById("menu_select")
-const priceInput = document.getElementById("menu_price")
+  const select = document.getElementById("menu_select");
+  const priceInput = document.getElementById("menu_price");
 
-function updatePrice(){
-    const price = select.options[select.selectedIndex].dataset.price
-    priceInput.value = price
-}
+  function updatePrice() {
+    const price = select.options[select.selectedIndex].dataset.price;
+    priceInput.value = price;
+  }
 
-updatePrice()
-select.addEventListener("change", updatePrice)
+  updatePrice();
+  select.addEventListener("change", updatePrice);
 </script>
-{% endif %}
-
-{% endblock %}
+{% endif %} {% endblock %}

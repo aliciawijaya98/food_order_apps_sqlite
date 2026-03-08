@@ -1,35 +1,39 @@
-{% extends "base.html" %}
-{% block title %}Edit Profile{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Edit Profile{% endblock %} {% block
+content %}
 <h1>Edit Profile</h1>
 
-{% if msg %}<p style="color:green">{{ msg }}</p>{% endif %}
+{% if msg %}
+<p style="color: green">{{ msg }}</p>
+{% endif %}
 
 <form method="post">
-    Name: <br>
-    <input name="name" value="{{ user.name }}"><br><br>
-    Email: <br>
-    <input name="email" value="{{ user.email }}"><br><br>
-    Job: <br>
-    <input name="job" value="{{ user.job }}"><br><br>
-    Phone: <br>
-    <input name="phone" value="{{ user.phone }}"><br><br>
-    Hobbies (comma-separated): <br>
-    <input type="text" name="hobby" value="{{ user.hobby | default('') | replace(',', ', ') }}"><br><br>
-    City: <br>
-    <input name="city" value="{{ user.city }}"><br><br>
-    RT: <br>
-    <input name="rt" value="{{ user.rt }}"><br><br>
-    RW: <br>
-    <input name="rw" value="{{ user.rw }}"><br><br>
-    ZIP: <br>
-    <input name="zip" value="{{ user.zip }}"><br><br>
-    Latitude: <br>
-    <input name="latitude" value="{{ user.latitude }}"><br><br>
-    Longitude: <br>
-    <input name="longitude" value="{{ user.longidute }}"><br><br>
-    
-    <button type="submit">Save Changes</button>
+  Name: <br />
+  <input name="name" value="{{ user.name }}" /><br /><br />
+  Email: <br />
+  <input name="email" value="{{ user.email }}" /><br /><br />
+  Job: <br />
+  <input name="job" value="{{ user.job }}" /><br /><br />
+  Phone: <br />
+  <input name="phone" value="{{ user.phone }}" /><br /><br />
+  Hobbies (comma-separated): <br />
+  <input
+    type="text"
+    name="hobby"
+    value="{{ user.hobby | default('') | replace(',', ', ') }}"
+  /><br /><br />
+  City: <br />
+  <input name="city" value="{{ user.city }}" /><br /><br />
+  RT: <br />
+  <input name="rt" value="{{ user.rt }}" /><br /><br />
+  RW: <br />
+  <input name="rw" value="{{ user.rw }}" /><br /><br />
+  ZIP: <br />
+  <input name="zip" value="{{ user.zip }}" /><br /><br />
+  Latitude: <br />
+  <input name="latitude" value="{{ user.latitude }}" /><br /><br />
+  Longitude: <br />
+  <input name="longitude" value="{{ user.longidute }}" /><br /><br />
+
+  <button type="submit">Save Changes</button>
 </form>
 {% endblock %}

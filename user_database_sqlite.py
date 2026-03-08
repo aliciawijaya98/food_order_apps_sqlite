@@ -117,7 +117,6 @@ def login_user(user_id, password):
 
 # GET USER BY USER_ID
 def get_user_by_userid(user_id):
-   
     with engine.connect() as conn:
         
         user = conn.execute(
