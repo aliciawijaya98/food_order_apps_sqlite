@@ -1,91 +1,156 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 
 <h2>Order Detail</h2>
 
 <div class="order-header">
-  <p><b>Invoice:</b> {{ order.invoice_code }}</p>
-  <p><b>Status:</b> {{ order.status }}</p>
-  <p>
-    <b>Total:</b> {{ "Rp {:,}".format(order.total_price|int).replace(',', '.')
-    }}
-  </p>
-</div>
 
-{% if editable %}
-<div class="add-item-form">
-  <form method="POST" action="{{ url_for('add_item', order_id=order.id) }}">
-    <label for="menu_select"><b>Menu Item:</b></label
-    ><br />
-    <select name="menu_id" id="menu_select">
-      {% for m in menus %}
-      <option value="{{ m.id }}" data-price="{{ m.price }}">
-        {{ m.category }} - {{ m.item }} (Rp {{
-        "{:,}".format(m.price|int).replace(',', '.') }})
-      </option>
-      {% endfor %}
-    </select>
-    <br /><br />
-    <label for="quantity"><b>Quantity:</b></label
-    ><br />
-    <input type="number" name="quantity" value="1" min="1" />
-    <input type="hidden" name="price" id="menu_price" />
-    <br /><br />
-    <button type="submit">Add Item</button>
-  </form>
-</div>
+<p><b>Invoice:</b> {{ order.invoice_code }}</p>
+
+<p>
+<b>Status:</b>
+
+{% if order.status == "pending" %}
+<span style="color:orange;">Pending</span>
+{% else %}
+<span style="color:green;">Paid</span>
 {% endif %}
 
-<br />
+</p>
 
-<table class="order-table">
-  <tr>
-    <th>Item</th>
-    <th>Qty</th>
-    <th>Price</th>
-    <th>Subtotal</th>
-    {% if editable %}
-    <th>Action</th>
-    {% endif %}
-  </tr>
+<p>
+<b>Total:</b>
+{{ "Rp {:,}".format(order.total_price|int).replace(',', '.') }}
+</p>
 
-  {% for item in items %}
-  <tr>
-    <td>{{ item.item }}</td>
-    <td>{{ item.quantity }}</td>
-    <td>{{ "Rp {:,}".format(item.price|int).replace(',', '.') }}</td>
-    <td>{{ "Rp {:,}".format(item.subtotal|int).replace(',', '.') }}</td>
-    {% if editable %}
-    <td>
-      <a
-        href="{{ url_for('delete_order_item', order_id=order.id, item_id=item.id) }}"
-      >
-        Delete
-      </a>
-    </td>
-    {% endif %}
-  </tr>
-  {% endfor %}
-</table>
+</div>
 
-{% if editable %}
-<br />
-<form
-  method="POST"
-  action="{{ url_for('pay_order_route', order_id=order.id) }}"
->
-  <button>Pay Order</button>
+
+{% if editable and order.status == "pending" %}
+
+<div class="add-item-form">
+
+<form method="POST" action="{{ url_for('add_item', order_id=order.id) }}">
+
+<label for="menu_select"><b>Menu Item:</b></label>
+<br>
+
+<select name="menu_id" id="menu_select">
+
+{% for m in menus %}
+
+<option value="{{ m.id }}" data-price="{{ m.price }}">
+
+{{ m.category }} - {{ m.item }}
+(Rp {{ "{:,}".format(m.price|int).replace(',', '.') }})
+
+</option>
+
+{% endfor %}
+
+</select>
+
+<br><br>
+
+<label for="quantity"><b>Quantity:</b></label>
+<br>
+
+<input type="number" name="quantity" value="1" min="1">
+
+<input type="hidden" name="price" id="menu_price">
+
+<br><br>
+
+<button type="submit">Add Item</button>
+
 </form>
 
+</div>
+
+{% endif %}
+
+
+<br>
+
+
+<table class="order-table">
+
+<tr>
+
+<th>Item</th>
+<th>Qty</th>
+<th>Price</th>
+<th>Subtotal</th>
+
+{% if editable and order.status == "pending" %}
+<th>Action</th>
+{% endif %}
+
+</tr>
+
+
+{% for item in items %}
+
+<tr>
+
+<td>{{ item.item }}</td>
+
+<td>{{ item.quantity }}</td>
+
+<td>Rp {{ "{:,}".format(item.price|int).replace(',', '.') }}</td>
+
+<td>Rp {{ "{:,}".format(item.subtotal|int).replace(',', '.') }}</td>
+
+{% if editable and order.status == "pending" %}
+
+<td>
+
+<a href="{{ url_for('delete_order_item', order_id=order.id, item_id=item.id) }}">
+Delete
+</a>
+
+</td>
+
+{% endif %}
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+{% if editable and order.status == "pending" %}
+
+<br>
+
+<form method="POST" action="{{ url_for('pay_order_route', order_id=order.id) }}">
+
+<button>Pay Order</button>
+
+</form>
+
+
 <script>
-  const select = document.getElementById("menu_select");
-  const priceInput = document.getElementById("menu_price");
 
-  function updatePrice() {
-    const price = select.options[select.selectedIndex].dataset.price;
-    priceInput.value = price;
-  }
+const select = document.getElementById("menu_select")
 
-  updatePrice();
-  select.addEventListener("change", updatePrice);
+const priceInput = document.getElementById("menu_price")
+
+function updatePrice(){
+
+const price = select.options[select.selectedIndex].dataset.price
+
+priceInput.value = price
+
+}
+
+updatePrice()
+
+select.addEventListener("change", updatePrice)
+
 </script>
-{% endif %} {% endblock %}
+
+{% endif %}
+
+{% endblock %}
