@@ -329,33 +329,21 @@ def orders():
         return redirect(url_for("login"))
 
     sales = get_daily_sales()
-    found_order = None
-    search_attempted = False
-
+    
     if request.method == "POST":
-        search_attempted = True
+        
         keyword = request.form.get("keyword", "").strip()
 
         order_id = find_order_id(keyword)
 
         if order_id:
-            order_data = get_order_detail(order_id)
-            if order_data:
-                # langsung render order_detail read-only
-                return render_template(
-                    "order_detail.html",
-                    order=order_data["order"],
-                    items=order_data["items"],
-                    menus=get_menu(),
-                    editable=False
-                )
+            return redirect(url_for("order_detail", order_id=order_id))
+
         # kalau tidak ketemu
         flash("Order not found")
 
-    return render_template("orders.html", sales=sales,
-                           search_attempted=search_attempted,
-                           found_order=found_order)
-
+    return render_template("orders.html", sales=sales)
+                           
 # CREATE ORDER
 @app.route("/orders/create", methods=["GET","POST"])
 def create_order_page():
@@ -410,7 +398,7 @@ def order_detail(order_id):
 # ADD ITEM TO ORDER
 @app.route("/orders/<int:order_id>/add", methods=["POST"])
 def add_item(order_id):
-
+    
     if "user_id" not in session:
         return redirect(url_for("login"))
 
@@ -428,11 +416,14 @@ def add_item(order_id):
 @app.route("/orders/pay/<int:order_id>", methods=["POST"])
 def pay_order_route(order_id):
 
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    
     success, message = pay_order(order_id)
 
     flash(message)
 
-    return redirect(url_for("orders")) 
+    return redirect(url_for("order_detail", order_id=order_id)) 
 
 # DELETE ITEM ON ORDER
 @app.route("/orders/<int:order_id>/delete_item/<int:item_id>")
