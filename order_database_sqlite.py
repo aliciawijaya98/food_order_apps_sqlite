@@ -1,40 +1,36 @@
-from database import engine
-from sqlalchemy import text
-from datetime import datetime
+from database import Base, SessionLocal
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, func
+from sqlalchemy.orm import relationship
+from datetime import date, datetime
+from menu_database_sqlite import FoodMenu
 
-def init_order_tables():
-    with engine.begin() as conn:
-        
-    #ORDERS TABLE (HEADER)
-        conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS orders(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            invoice_code TEXT UNIQUE NOT NULL,
-            user_id TEXT NOT NULL,
-            order_type TEXT NOT NULL,
-            reference_number INTEGER,
-            total_price REAL DEFAULT 0,
-            order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-            status TEXT DEFAULT 'pending',
-            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-        )               
-        """))
-    
-        #ORDER ITEM (DETAIL)
-        conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS order_items(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            order_id INTEGER NOT NULL,
-            menu_id INTEGER NOT NULL,
-            quantity INTEGER NOT NULL,
-            price REAL NOT NULL, 
-            subtotal REAL NOT NULL,
-            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-            FOREIGN KEY (menu_id) REFERENCES food_menu(id)
-        )
-        """))
-        
-#CREATE ORDER (HEADER)
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True)
+    invoice_code = Column(String, unique=True, nullable=False)
+    user_id = Column(String, ForeignKey("users.user_id"), nullable=False)
+    order_type = Column(String, nullable=False)
+    reference_number = Column(Integer)
+    total_price = Column(Float, default=0)
+    order_date = Column(DateTime, default=datetime.utcnow)
+    status = Column(String, default="pending")
+
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete")
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"))
+    menu_id = Column(Integer, ForeignKey("food_menu.id"))
+    quantity = Column(Integer, nullable=False)
+    price = Column(Float, nullable=False)
+    subtotal = Column(Float, nullable=False)
+
+    order = relationship("Order", back_populates="items")
+            
+# CREATE ORDER (HEADER)
 def create_order(user_id, order_type, reference_number):
     if order_type not in ["Dine-in", "Takeaway"]:
         return None, "Invalid order type."
@@ -46,223 +42,186 @@ def create_order(user_id, order_type, reference_number):
         if active_order:
             return None, f"Table {reference_number} already has an active order."
     
+    session = SessionLocal()
+
     try:
-        
-        with engine.begin() as conn:
-            
-            result = conn.execute(
-                text("""
-                INSERT INTO orders (invoice_code, user_id, order_type, reference_number)
-                VALUES ('TEMP',:user_id,:order_type,:reference_number)
-                """),
-                {
-                    "user_id": user_id,
-                    "order_type": order_type,
-                    "reference_number": reference_number
-                }
-            )
-            
-            order_id = result.lastrowid
+        new_order = Order(
+            invoice_code="TEMP",
+            user_id=user_id,
+            order_type=order_type,
+            reference_number=reference_number
+        )
 
-            today_str = datetime.now().strftime("%Y%m%d")
-            invoice_code = f"{today_str}-{order_id:04d}"
+        session.add(new_order)
+        session.flush()
 
-            conn.execute(
-                text("""
-                UPDATE orders
-                SET invoice_code=:invoice
-                WHERE id=:id
-                """), 
-                {"invoice":invoice_code,"id":order_id}    
-            )
+        today_str = datetime.now().strftime("%Y%m%d")
+        new_order.invoice_code = f"{today_str}-{new_order.id:04d}"
 
-        return order_id, invoice_code
+        session.commit()
+
+        return new_order.id, new_order.invoice_code
 
     except Exception as e:
-        return None, f"Database error: {e}"
+        session.rollback()
+        return None, str(e)
+
+    finally:
+        session.close()
     
 #ADD ORDER ITEM (DETAIL)
 def add_order_item(order_id, menu_id, quantity, price):
-    
+
     if quantity <= 0:
         return False, "Quantity must be greater than 0."
-    
+
+    session = SessionLocal()
+
     try:
-        with engine.begin() as conn:
-            
-            #cek status order
-            order_status = conn.execute(
-                text("SELECT status FROM orders WHERE id=:id"),
-                {"id": order_id}
-            ).scalar()
-            
-            if order_status is None:
-                return False, "Order not found."
+        order = session.query(Order).filter(Order.id == order_id).first()
+        if not order:
+            return False, "Order not found."
 
-            if order_status != "pending":
-                return False, "Cannot add item. Order already closed."
-            
-            subtotal = quantity * price
-        
-            conn.execute(
-                text("""
-                INSERT INTO order_items
-                (order_id, menu_id, quantity, price, subtotal)
-                VALUES (:order_id,:menu_id,:quantity,:price,:subtotal)
-                """),
-                { 
-                    "order_id":order_id, 
-                    "menu_id":menu_id, 
-                    "quantity":quantity, 
-                    "price":price, 
-                    "subtotal":subtotal
-                }    
-            )
-        
-            # update total in SAME transaction
-            total = conn.execute(
-                text("""
-                SELECT SUM(subtotal)
-                FROM order_items
-                WHERE order_id=:order_id
-                """), 
-                {"order_id":order_id}
-            ).scalar()
-    
-            conn.execute(
-            text("""
-                UPDATE orders
-                SET total_price=:total_price
-                WHERE id=:id
-                """),
-                {"total_price":total or 0,"id":order_id}
-            )
-    
+        if order.status != "pending":
+            return False, "Cannot add item. Order already closed."
+
+        menu = session.query(FoodMenu).filter(FoodMenu.id == menu_id).first()
+        if not menu:
+            return False, "Menu not found."
+
+        subtotal = quantity * menu.price
+
+        new_item = OrderItem(
+            order_id=order_id,
+            menu_id=menu_id,
+            quantity=quantity,
+            price=menu.price,
+            subtotal=subtotal
+        )
+
+        session.add(new_item)
+        order.total_price += subtotal
+
+        session.commit()
+
         return True, "Item added."
-    
-    except Exception as e:
-        return False, f"Database error: {e}"
-    
-   
-        
-#GET ORDER DETAIL
-def get_order_detail(order_id):
 
-    with engine.connect() as conn:
-        order = conn.execute(
-            text("""
-            SELECT * FROM orders
-            WHERE id=:id
-            """), 
-            {"id":order_id}
-        ).mappings().first()
-        
-        if order is None:
+    except Exception as e:
+        session.rollback()
+        return False, str(e)
+
+    finally:
+        session.close()
+    
+# GET ORDER DETAIL
+def get_order_detail(order_id):
+    session = SessionLocal()
+
+    try:
+        order = session.query(Order).filter(Order.id == order_id).first()
+
+        if not order:
             return None
-    
-        items = conn.execute(
-            text("""
-            SELECT oi.id, oi.quantity, oi.price, oi.subtotal, m.item
-            FROM order_items oi
-            JOIN food_menu m ON oi.menu_id=m.id
-            WHERE oi.order_id=:id
-            """), 
-            {"id":order_id}
-        ).mappings().all()
-    
-    return {
-        "order":order,
-        "items":items
-    }
+
+        items = []
+        for item in order.items:  # <-- relationship magic
+            items.append({
+                "id": item.id,
+                "quantity": item.quantity,
+                "price": item.price,
+                "subtotal": item.subtotal,
+                "menu_name": item.menu.item if item.menu else None
+            })
+
+        order_data = {
+            "id": order.id,
+            "invoice_code": order.invoice_code,
+            "total_price": order.total_price,
+            "status": order.status
+        }
+
+        return {
+            "order": order_data,
+            "items": items
+        }
+
+    finally:
+        session.close()
 
 #DAILY SALES REPORT
 def get_daily_sales():
-    
-    with engine.connect() as conn:
-    
-        result = conn.execute(
-            text("""
-            SELECT COUNT(*) as total_orders, 
-                SUM(total_price) as total_revenue
-            FROM orders
-            WHERE DATE(order_date) = date('now')
-            AND status != 'cancelled'               
-            """)
-        ).mappings().first()
+    session = SessionLocal()
 
-    return{
-        "total_orders": result["total_orders"] or 0,
-        "total_revenue": result ["total_revenue"] or 0
-    }
+    try:
+        result = session.query(
+            func.count(Order.id),
+            func.sum(Order.total_price)
+        ).filter(
+            func.date(Order.order_date) == date.today(),
+            Order.status != "cancelled"
+        ).first()
+
+        return {
+            "total_orders": result[0] or 0,
+            "total_revenue": result[1] or 0
+        }
+
+    finally:
+        session.close()
 
 #Check Active table biar gak double
 def check_active_table(table_number):
+    session = SessionLocal()
 
-    with engine.connect() as conn:
-
-        result = conn.execute(
-            text("""
-            SELECT id 
-            FROM orders
-            WHERE reference_number=:table
-            AND order_type='Dine-in'
-            AND status='pending'
-            LIMIT 1
-            """), 
-            {"table":table_number}
+    try:
+        order = session.query(Order).filter(
+            Order.reference_number == table_number,
+            Order.order_type == "Dine-in",
+            Order.status == "pending"
         ).first()
-    
-    return result [0] if result else None
+
+        return order.id if order else None
+
+    finally:
+        session.close()
 
 #Payment System
 def pay_order(order_id):
-    
+    session = SessionLocal()
+
     try:
-    
-        with engine.begin() as conn:
-        
-            result = conn.execute(
-                text("""
-                UPDATE orders
-                SET status = 'paid'
-                WHERE id=:id 
-                AND status = 'pending'
-                """), 
-                {"id":order_id}
-            )
-        
-            if result.rowcount == 0:
-                return False, "Order cannot be paid"
-        
-        
+        order = session.query(Order).filter(Order.id == order_id).first()
+
+        if not order or order.status != "pending":
+            return False, "Order cannot be paid"
+
+        order.status = "paid"
+        session.commit()
+
         return True, "Payment successful. Order closed."
-    
+
     except Exception as e:
-        return False, f"Database error: {e}"
-      
+        session.rollback()
+        return False, str(e)
+
+    finally:
+        session.close()
+
 #Find order
 def find_order_id(keyword):
-    
-    with engine.connect() as conn:
+    session = SessionLocal()
 
-        # Cek invoice_code dulu
-        result = conn.execute(
-            text("""
-            SELECT id FROM orders
-            WHERE invoice_code=:code
-            """), 
-            {"code":keyword}
+    try:
+        order = session.query(Order).filter(
+            Order.invoice_code == keyword
         ).first()
-        
-        # Kalau tidak ketemu dan input angka → cek sebagai table number
-        if not result and keyword.isdigit():
-        
-            result = conn.execute(
-            text("""
-                SELECT id FROM orders
-                WHERE reference_number=:table
-                """), 
-                {"table":int(keyword)}
+
+        if not order and keyword.isdigit():
+            order = session.query(Order).filter(
+                Order.reference_number == int(keyword)
             ).first()
-        
-    return result[0] if result else None
+
+        return order.id if order else None
+
+    finally:
+        session.close()

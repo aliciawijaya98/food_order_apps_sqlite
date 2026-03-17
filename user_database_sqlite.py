@@ -1,5 +1,5 @@
-from database import engine
-from sqlalchemy import text
+from database import Base, SessionLocal
+from sqlalchemy import Column, Integer, String
 import hashlib
 
 # PASSWORD HASHING
@@ -7,217 +7,151 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 # INIT USERS TABLE
-def init_users_table():
-    
-    with engine.begin() as conn:
+class User(Base):
+    __tablename__ = "users"
 
-        conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL UNIQUE,          
-            password TEXT NOT NULL,  
-            email TEXT NOT NULL UNIQUE,
-            name TEXT NOT NULL,
-            gender TEXT NOT NULL,
-            age INTEGER NOT NULL,
-            job TEXT,
-            hobby TEXT,
-            city TEXT,
-            rt TEXT,
-            rw TEXT,
-            zip TEXT,
-            latitude TEXT,
-            longitude TEXT,
-            phone TEXT
-        )
-        """))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=False)
+    gender = Column(String, nullable=False)
+    age = Column(Integer, nullable=False)
+    job = Column(String)
+    hobby = Column(String)
+    city = Column(String)
+    rt = Column(String)
+    rw = Column(String)
+    zip = Column(String)
+    latitude = Column(String)
+    longitude = Column(String)
+    phone = Column(String)
 
 # REGISTER USER
 def register_user(data):
-    
-    required_fields = [
-    "user_id", "password", "email", "name",
-    "gender", "age", "job", "hobby",
-    "city", "rt", "rw", "zip",
-    "latitude", "longitude", "phone"
-]
+    session = SessionLocal()
 
-    if not all(field in data for field in required_fields):
-        return False, "Incomplete registration data."
-    
     try:
-        if int(data["age"]) <= 0:
-            return False, "Invalid age."
-    except ValueError:
-        return False, "Age must be a number."
-    
-    try:
-        
-        with engine.begin() as conn:
-
-            conn.execute(
-            text("""
-            INSERT INTO users
-            (user_id,password,email,name,gender,age,job,hobby,
-            city,rt,rw,zip,latitude,longitude,phone)
-            VALUES
-            (:user_id,:password,:email,:name,:gender,:age,:job,:hobby,
-             :city,:rt,:rw,:zip,:latitude,:longitude,:phone)
-            """),
-            {
-                "user_id": data["user_id"],
-                "password": hash_password(data["password"]),
-                "email": data["email"],
-                "name": data["name"],
-                "gender": data["gender"],
-                "age": data["age"],
-                "job": data["job"],
-                "hobby": ",".join(data["hobby"]) if isinstance(data["hobby"], list) else data["hobby"],
-                "city": data["city"],
-                "rt": data["rt"],
-                "rw": data["rw"],
-                "zip": data["zip"],
-                "latitude": data["latitude"],
-                "longitude": data["longitude"],
-                "phone": data["phone"]
-            }
+        new_user = User(
+            user_id=data["user_id"],
+            password=hash_password(data["password"]),
+            email=data["email"],
+            name=data["name"],
+            gender=data["gender"],
+            age=data["age"],
+            job=data["job"],
+            hobby=",".join(data["hobby"]) if isinstance(data["hobby"], list) else data["hobby"],
+            city=data["city"],
+            rt=data["rt"],
+            rw=data["rw"],
+            zip=data["zip"],
+            latitude=data["latitude"],
+            longitude=data["longitude"],
+            phone=data["phone"]
         )
-            
+
+        session.add(new_user)
+        session.commit()
+
         return True, "Registration successful."
 
     except Exception as e:
+        session.rollback()
         if "UNIQUE constraint" in str(e):
             return False, "UserID or Email already exists."
         return False, f"Database error: {e}"
 
+    finally:
+        session.close()
+
 # LOGIN USER
 def login_user(user_id, password):
-    
-    with engine.connect() as conn:
-        
-        user = conn.execute(
-            text("""
-            SELECT * 
-            FROM users 
-            WHERE user_id=:user_id 
-            """),
-            {"user_id":user_id}
-        ).mappings().first()
+    session = SessionLocal()
+
+    user = session.query(User).filter(User.user_id == user_id).first()
+
+    session.close()
 
     if not user:
         return False, "User not registered."
 
-    if user["password"] != hash_password(password):
+    if user.password != hash_password(password):
         return False, "Wrong password."
 
-    user_dict = dict(user)
+    user_dict = user.__dict__.copy()
+    user_dict.pop("_sa_instance_state", None)
     user_dict.pop("password", None)
 
     return True, user_dict
 
 # GET USER BY USER_ID
 def get_user_by_userid(user_id):
-    with engine.connect() as conn:
-        
-        user = conn.execute(
-            text("""
-            SELECT * FROM users 
-            WHERE user_id=:user_id
-            """), 
-            {"user_id":user_id}
-        ).mappings().first()
-        
-    if user:
-        user = dict(user)
-        user.pop("password", None)
+    session = SessionLocal()
 
-    return user
+    user = session.query(User).filter(User.user_id == user_id).first()
+
+    session.close()
+
+    if not user:
+        return None
+
+    user_dict = user.__dict__.copy()
+    user_dict.pop("_sa_instance_state", None)
+    user_dict.pop("password", None)
+
+    return user_dict
 
 # UPDATE USER
 
 def update_user(user_id, updated_data):
+    session = SessionLocal()
+
+    user = session.query(User).filter(User.user_id == user_id).first()
+
+    if not user:
+        session.close()
+        return False, "User not found."
 
     try:
-        
-        with engine.begin() as conn:
+        for key, value in updated_data.items():
+            if hasattr(user, key):
+                setattr(user, key, value)
 
-            result = conn.execute(
-                text("""
-                UPDATE users
-                SET name=:name,
-                    email=:email,
-                    job=:job,
-                    phone=:phone,
-                    city=:city,
-                    rt=:rt,
-                    rw=:rw,
-                    zip=:zip,
-                    latitude=:latitude,
-                    longitude=:longitude
-                WHERE user_id=:user_id
-                """),
-                {
-                    "name":updated_data["name"],
-                    "email":updated_data["email"],
-                    "job":updated_data["job"],
-                    "phone":updated_data["phone"],
-                    "city":updated_data["city"],
-                    "rt":updated_data["rt"],
-                    "rw":updated_data["rw"],
-                    "zip":updated_data["zip"],
-                    "latitude":updated_data["latitude"],
-                    "longitude":updated_data["longitude"],
-                    "user_id":user_id
-                }
-            )
-
-        if result.rowcount == 0:
-            return False, "User not found."
-
+        session.commit()
         return True, "Profile updated successfully."
 
     except Exception as e:
-        if "UNIQUE constraint" in str(e):
-            return False, "Email already in use."
+        session.rollback()
         return False, f"Database error: {e}"
+
+    finally:
+        session.close()
 
 
 # DELETE USER
 
 def delete_user(user_id):
-    
-    try:
-        
-        with engine.begin() as conn:
-            
-            result = conn.execute(
-                text("""
-                DELETE FROM users 
-                WHERE user_id=:user_id
-                """), 
-                {"user_id":user_id}
-            )
-       
+    session = SessionLocal()
 
-        if result.rowcount == 0:
-            return False, "User not found."
+    user = session.query(User).filter(User.user_id == user_id).first()
 
-        return True, "Account deleted successfully."
+    if not user:
+        session.close()
+        return False, "User not found."
 
-    except Exception as e:
-        return False,f"Database error: {e}"
+    session.delete(user)
+    session.commit()
+    session.close()
+
+    return True, "Account deleted successfully."
         
 #VIEW USER ALL
 
 def get_all_users():
-    
-    with engine.connect() as conn:
-    
-        users = conn.execute(
-        text("""
-            SELECT user_id, name 
-            FROM users
-            """)
-        ).mappings().all()
-        
+    session = SessionLocal()
+
+    users = session.query(User.user_id, User.name).all()
+
+    session.close()
+
     return users
