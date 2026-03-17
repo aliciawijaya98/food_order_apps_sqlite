@@ -225,3 +225,33 @@ def find_order_id(keyword):
 
     finally:
         session.close()
+
+def delete_order_item(order_id, item_id):
+    session = SessionLocal()
+
+    try:
+        item = session.query(OrderItem).filter(
+            OrderItem.id == item_id
+        ).first()
+
+        if not item:
+            return False, "Item not found"
+
+        session.delete(item)
+
+        order = session.query(Order).filter(
+            Order.id == order_id
+        ).first()
+
+        order.total_price = sum(i.subtotal for i in order.items)
+
+        session.commit()
+
+        return True, "Item removed"
+
+    except Exception as e:
+        session.rollback()
+        return False, str(e)
+
+    finally:
+        session.close()

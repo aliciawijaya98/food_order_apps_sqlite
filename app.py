@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from database import Base, engine
 from user_database_sqlite import (
-    init_users_table,
     register_user,
     login_user,
     get_user_by_userid,
@@ -9,7 +9,6 @@ from user_database_sqlite import (
     get_all_users
 )
 from menu_database_sqlite import(
-    init_menu_table,
     get_menu,
     add_menu_item,
     update_menu_item,
@@ -18,22 +17,20 @@ from menu_database_sqlite import(
 )
 
 from order_database_sqlite import (
-    init_order_tables,
     create_order,
     add_order_item,
     get_order_detail,
     get_daily_sales,
     pay_order,
-    find_order_id
+    find_order_id,
+    delete_order_item
 )
 
 app = Flask(__name__)
 app.secret_key = "dsdjsbjrerfnsakaleek"
 
-# USER DATABASE
-init_users_table()
-init_menu_table()
-init_order_tables()
+# CREATE TABLES
+Base.metadata.create_all(bind=engine)
 
 # VALIDATION
 def validate_email(email):
@@ -98,7 +95,7 @@ def validate_password(pw):
 def index():
     if"user_id" not in session:
         return redirect(url_for("login"))
-     
+    
     user = get_user_by_userid(session["user_id"])
     
     return render_template("index.html", user=user)  
@@ -343,7 +340,7 @@ def orders():
         flash("Order not found")
 
     return render_template("orders.html", sales=sales)
-                           
+
 # CREATE ORDER
 @app.route("/orders/create", methods=["GET","POST"])
 def create_order_page():
@@ -427,44 +424,14 @@ def pay_order_route(order_id):
 
 # DELETE ITEM ON ORDER
 @app.route("/orders/<int:order_id>/delete_item/<int:item_id>")
-def delete_order_item(order_id, item_id):
+def delete_order_item_route(order_id, item_id):
 
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    from database import engine
-    from sqlalchemy import text
+    success, message = delete_order_item(order_id, item_id)
 
-    with engine.begin() as conn:
-
-        conn.execute(
-            text("""
-            DELETE FROM order_items
-            WHERE id=:id
-            """),
-            {"id": item_id}
-        )
-
-        # update total order
-        total = conn.execute(
-            text("""
-            SELECT SUM(subtotal)
-            FROM order_items
-            WHERE order_id=:order_id
-            """),
-            {"order_id": order_id}
-        ).scalar()
-
-        conn.execute(
-            text("""
-            UPDATE orders
-            SET total_price=:total
-            WHERE id=:id
-            """),
-            {"total": total or 0, "id": order_id}
-        )
-
-    flash("Item removed")
+    flash(message)
 
     return redirect(url_for("order_detail", order_id=order_id))
 
