@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from database import Base, engine
 from user_database_sqlite import (
     register_user,
-    login_user,
+    login_user,   
     get_user_by_userid,
     update_user,
     delete_user,
@@ -25,9 +25,10 @@ from order_database_sqlite import (
     find_order_id,
     delete_order_item
 )
+import os
 
 app = Flask(__name__)
-app.secret_key = "dsdjsbjrerfnsakaleek"
+app.secret_key = os.urandom(24)
 
 # CREATE TABLES
 Base.metadata.create_all(bind=engine)
@@ -267,12 +268,18 @@ def add_menu():
     
     if request.method == "POST":
     
+        try:
+            price = int(request.form["price"])
+        except:
+            flash("Invalid price")
+            return redirect(url_for("add_menu"))
+
         new_item = {
             "category": request.form["category"],
             "item": request.form["item"],
-            "price": int(request.form["price"])
-        }
-    
+            "price": price
+            }
+        
         success, message = add_menu_item(new_item)
     
         flash(message)
@@ -307,7 +314,7 @@ def edit_menu(menu_id):
     return render_template("edit_menu.html", menu=menu)
 
 # DELETE MENU
-@app.route("/menu/delete/<int:menu_id>")
+@app.route("/menu/delete/<int:menu_id>", methods =["POST"])
 def delete_menu(menu_id):
 
     if "user_id" not in session:
@@ -351,7 +358,16 @@ def create_order_page():
     if request.method == "POST":
 
         order_type = request.form["order_type"]
-        reference_number = request.form["reference_number"]
+        reference_number = request.form.get("reference_number")
+        
+        if reference_number:
+            try:
+                reference_number = int(reference_number)
+            except:
+                flash("Invalid table number")
+                return redirect(url_for("create_order_page"))
+        else: 
+            reference_number = None
 
         order_id, invoice = create_order(
             session["user_id"],
@@ -401,9 +417,8 @@ def add_item(order_id):
 
     menu_id = int(request.form["menu_id"])
     quantity = int(request.form["quantity"])
-    price = float(request.form["price"])
 
-    success, message = add_order_item(order_id, menu_id, quantity, price)
+    success, message = add_order_item(order_id, menu_id, quantity)
 
     flash(message)
 
@@ -423,7 +438,7 @@ def pay_order_route(order_id):
     return redirect(url_for("order_detail", order_id=order_id)) 
 
 # DELETE ITEM ON ORDER
-@app.route("/orders/<int:order_id>/delete_item/<int:item_id>")
+@app.route("/orders/<int:order_id>/delete_item/<int:item_id>", methods=["POST"])
 def delete_order_item_route(order_id, item_id):
 
     if "user_id" not in session:
@@ -438,4 +453,4 @@ def delete_order_item_route(order_id, item_id):
 
 # RUN
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

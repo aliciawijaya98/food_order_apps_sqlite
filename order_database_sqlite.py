@@ -1,7 +1,7 @@
 from database import Base, SessionLocal
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, func, Enum
 from sqlalchemy.orm import relationship
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from menu_database_sqlite import FoodMenu
 
 class Order(Base):
@@ -14,7 +14,7 @@ class Order(Base):
     reference_number = Column(Integer)
     total_price = Column(Float, default=0)
     order_date = Column(DateTime, default=datetime.utcnow)
-    status = Column(String, default="pending")
+    status = Column(Enum("pending", "paid", "cancelled", name= "order_status"), default="pending")
 
     items = relationship("OrderItem", back_populates="order", cascade="all, delete")
 
@@ -29,6 +29,7 @@ class OrderItem(Base):
     subtotal = Column(Float, nullable=False)
 
     order = relationship("Order", back_populates="items")
+    menu = relationship("FoodMenu")
             
 # CREATE ORDER (HEADER)
 def create_order(user_id, order_type, reference_number):
@@ -53,9 +54,10 @@ def create_order(user_id, order_type, reference_number):
         )
 
         session.add(new_order)
-        session.flush()
+        session.flush()  # get ID
+        session.refresh(new_order)
 
-        today_str = datetime.now().strftime("%Y%m%d")
+        today_str = datetime.utcnow().strftime("%Y%m%d")
         new_order.invoice_code = f"{today_str}-{new_order.id:04d}"
 
         session.commit()
@@ -70,9 +72,9 @@ def create_order(user_id, order_type, reference_number):
         session.close()
     
 #ADD ORDER ITEM (DETAIL)
-def add_order_item(order_id, menu_id, quantity, price):
+def add_order_item(order_id, menu_id, quantity):
 
-    if quantity <= 0:
+    if not isinstance(quantity, int) or quantity <= 0:
         return False, "Quantity must be greater than 0."
 
     session = SessionLocal()
@@ -100,7 +102,9 @@ def add_order_item(order_id, menu_id, quantity, price):
         )
 
         session.add(new_item)
-        order.total_price += subtotal
+        session.flush()
+        
+        order.total_price = sum(i.subtotal for i in order.items) 
 
         session.commit()
 
@@ -153,11 +157,17 @@ def get_daily_sales():
     session = SessionLocal()
 
     try:
+        # Ambil awal hari ini (00:00:00)
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        # Ambil awal hari besok
+        tomorrow = today + timedelta(days=1)
+
         result = session.query(
             func.count(Order.id),
             func.sum(Order.total_price)
         ).filter(
-            func.date(Order.order_date) == date.today(),
+            Order.order_date >= today,
+            Order.order_date < tomorrow,
             Order.status != "cancelled"
         ).first()
 
@@ -242,7 +252,8 @@ def delete_order_item(order_id, item_id):
         order = session.query(Order).filter(
             Order.id == order_id
         ).first()
-
+        
+        session.flush()
         order.total_price = sum(i.subtotal for i in order.items)
 
         session.commit()

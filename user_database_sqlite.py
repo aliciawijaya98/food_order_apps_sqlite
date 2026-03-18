@@ -115,6 +115,8 @@ def update_user(user_id, updated_data):
     try:
         for key, value in updated_data.items():
             if hasattr(user, key):
+                if key == "password":
+                    value = hash_password(value)
                 setattr(user, key, value)
 
         session.commit()
