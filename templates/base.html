@@ -7,6 +7,7 @@
       href="{{ url_for('static', filename='style.css') }}"
     />
   </head>
+
   <body>
     {% if not (request.endpoint == 'login' or request.endpoint == 'register') %}
     <nav class="navbar">
@@ -16,9 +17,12 @@
         <a href="{{ url_for('menu') }}">Menu</a>
         <a href="{{ url_for('orders') }}">Orders</a>
 
-        <a href="{{ url_for('profile') }}" class="nav-user">Profile</a>
-
+        <a href="{{ url_for('profile') }}">Profile</a>
         <a href="{{ url_for('logout') }}">Logout</a>
+
+        <!-- 🔥 DARK MODE BUTTON -->
+        <span class="dark-toggle" onclick="toggleDark()" id="themeIcon">🌙</span>
+
         {% else %}
         <a href="{{ url_for('login') }}">Login</a>
         <a href="{{ url_for('register') }}">Register</a>
@@ -28,13 +32,44 @@
     {% endif %}
 
     <main class="page">
-      {% with messages = get_flashed_messages() %} {% if messages %}
-      <div class="flash-message">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="flash">
         {% for msg in messages %}
         <p>{{ msg }}</p>
         {% endfor %}
       </div>
-      {% endif %} {% endwith %} {% block content %}{% endblock %}
+      {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
     </main>
+
+    <!-- 🔥 JAVASCRIPT DARK MODE -->
+    <script>
+      function toggleDark() {
+        document.body.classList.toggle("dark");
+
+        let icon = document.getElementById("themeIcon");
+
+        if (document.body.classList.contains("dark")) {
+          localStorage.setItem("theme", "dark");
+          if (icon) icon.innerText = "☀️";
+        } else {
+          localStorage.setItem("theme", "light");
+          if (icon) icon.innerText = "🌙";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        let savedTheme = localStorage.getItem("theme");
+        let icon = document.getElementById("themeIcon");
+
+        if (savedTheme === "dark") {
+          document.body.classList.add("dark");
+          if (icon) icon.innerText = "☀️";
+        }
+      });
+    </script>
   </body>
 </html>

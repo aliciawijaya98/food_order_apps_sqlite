@@ -1,4 +1,5 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 
 <h2>Menu Management</h2>
 
@@ -6,28 +7,28 @@
   <button>Add Menu</button>
 </a>
 
-<table>
-  <tr>
-    <th>Category</th>
-    <th>Item</th>
-    <th>Price</th>
-    <th>Action</th>
-  </tr>
+<div class="menu-grid">
 
   {% for m in menus %}
+  <div class="menu-card">
 
-  <tr>
-    <td>{{ m.category }}</td>
-    <td>{{ m.item }}</td>
-    <td>{{ "Rp {:,}".format(m.price|int).replace(',', '.') }}</td>
+    <h4>{{ m.item }}</h4>
+    <p>{{ m.category }}</p>
+    <p><strong>{{ "Rp {:,}".format(m.price|int).replace(',', '.') }}</strong></p>
 
-    <td>
-      <a href="{{ url_for('edit_menu', menu_id=m.id) }}">Edit</a>
-      <a href="{{ url_for('delete_menu', menu_id=m.id) }}">Delete</a>
-    </td>
-  </tr>
+    <div style="margin-top:10px;">
+      <a href="{{ url_for('edit_menu', menu_id=m.id) }}">
+        <button>Edit</button>
+      </a>
 
+      <form action="{{ url_for('delete_menu', menu_id=m.id) }}" method="POST" style="display:inline;">
+        <button type="submit">Delete</button>
+      </form>
+    </div>
+
+  </div>
   {% endfor %}
-</table>
+
+</div>
 
 {% endblock %}
